@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">RTLnotepad</string>
+    <string name="save">שמור</string>
+	<string name="save_as">שמור כ...</string>
+	<string name="open">פתח</string>
+	<string name="done">Done</string>
+	<string name="ok">OK</string>
+	<string name="up">למעלה</string>
+	<string name="file_overwrite">This file already exists. Overwrite it?</string>
+	<string name="no">לא</string>
+	<string name="yes">כן</string>
+	<string name="cancel">ביטול</string>
+	<string name="folder_open_error">Unable to open the folder.</string>
+	<string name="text_size">Font size</string>
+	<string name="theme">Theme</string>
+	<string name="theme_light">Light</string>
+	<string name="theme_dark">Dark</string>
+	<string name="text_small">קטן (14sp)</string>
+	<string name="text_medium">בינוני (18sp)</string>
+	<string name="text_large">גדול (22sp)</string>
+	<string name="exit">Exit</string>
+	<string name="unsaved_files">There are unsaved changes. Are you sure you want to exit?</string>
+	<string name="last_files">Last files</string>
+	<string name="encoding">Encoding</string>
+	<string name="file">קובץ</string>
+	<string name="view">View</string>
+	<string name="about">About</string>
+	<string name="create">Create</string>
+	<string name="no_editor">Create or open a file to start editing</string>
+	<string name="new_document">New document</string>
+	<string name="new_file">קובץ חדש</string>
+	<string name="close_tab">סגור את הכרטיסיה</string>
+	<string name="close_tab_warning">There are unsaved changes in this tab. Save them before closing?</string>
+	<string name="apply">Apply</string>
+	<string name="encoding_error">Failed to change encoding.</string>
+	<string name="encoding_change_warning">There are unsaved changes to this file. If you change the encoding, they will be lost. Proceed?</string>
+	<string name="file_save_error">Failed to save the file.</string>
+	<string name="wrong_file_type_warning">This is not a text file. Proceed?</string>
+    <string name="reading_error">Failed to read the file.</string>
+
+</resources>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="save">Зберегти</string>
+	<string name="save_as">Зберегти як...</string>
+	<string name="open">Відкрити</string>
+	<string name="done">Виконано</string>
+	<string name="ok">ОК</string>
+	<string name="up">Вгору</string>
+	<string name="file_overwrite">Цей файл вже існує. Перезаписати?</string>
+	<string name="no">Ні</string>
+	<string name="yes">Так</string>
+	<string name="cancel">Скасувати</string>
+	<string name="folder_open_error">Неможливо відкрити папку.</string>
+	<string name="text_size">Розмір шрифту</string>
+	<string name="theme">Тема</string>
+	<string name="theme_light">Світла</string>
+	<string name="theme_dark">Темна</string>
+	<string name="text_small">Маленький (14sp)</string>
+	<string name="text_medium">Середній (18sp)</string>
+	<string name="text_large">Великий (22sp)</string>
+	<string name="exit">Вихід</string>
+	<string name="unsaved_files">У вас є незбережені зміни. Ви впевнені, що хочете вийти?</string>
+	<string name="last_files">Останні файли</string>
+	<string name="encoding">Кодування</string>
+	<string name="file">Файл</string>
+	<string name="view">Вид</string>
+	<string name="about">Про програму</string>
+	<string name="create">Створити</string>
+    <string name="reading_error">Не вдалося прочитати файл.</string>
+	<string name="app_name">RTLnotepad</string>
+	<string name="no_editor">Створіть або відкрийте файл, щоб почати роботу</string>
+	<string name="new_document">Новий документ</string>
+	<string name="new_file">Новий файл</string>
+	<string name="close_tab">Закрити вкладку</string>
+	<string name="close_tab_warning">У цій вкладці є незбережені зміни. Зберегти їх перед закриттям?</string>
+	<string name="apply">Застосувати</string>
+	<string name="encoding_error">Не вдалося змінити кодування.</string>
+	<string name="encoding_change_warning">У цьому файлі є незбережені зміни. При зміні кодування їх буде втрачено.
+		Продовжити?
+	</string>
+	<string name="file_save_error">Не вдалося зберегти файл.</string>
+	<string name="wrong_file_type_warning">Це не текстовий файл. Продовжити?</string>
+</resources>

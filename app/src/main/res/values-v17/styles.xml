@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+	<resources>
+		<style name="Leonidius.Light" parent="android:Theme.Holo.Light"></style>
+		<style name="Leonidius.Dark" parent="android:Theme.Holo"></style>
+	</resources>

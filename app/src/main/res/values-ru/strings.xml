@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="save">Сохранить</string>
+	<string name="save_as">Сохранить как...</string>
+	<string name="open">Открыть</string>
+	<string name="done">Выполнено</string>
+	<string name="ok">ОК</string>
+	<string name="up">Вверх</string>
+	<string name="file_overwrite">Этот файл уже существует. Перезаписать?</string>
+	<string name="no">Нет</string>
+	<string name="yes">Да</string>
+	<string name="cancel">Отмена</string>
+	<string name="folder_open_error">Невозможно открыть папку.</string>
+	<string name="text_size">Размер шрифта</string>
+	<string name="theme">Тема</string>
+	<string name="theme_light">Светлая</string>
+	<string name="theme_dark">Тёмная</string>
+	<string name="text_small">Маленький (14sp)</string>
+	<string name="text_medium">Средний (18sp)</string>
+	<string name="text_large">Большой (22sp)</string>
+	<string name="exit">Выход</string>
+	<string name="unsaved_files">У вас есть несохранённые изменения. Вы уверены, что хотите выйти?</string>
+	<string name="last_files">Последние файлы</string>
+	<string name="encoding">Кодировка</string>
+	<string name="file">Файл</string>
+	<string name="view">Вид</string>
+	<string name="about">О программе</string>
+	<string name="create">Создать</string>
+	<string name="reading_error">Не удалось прочитать файл.</string>
+	<string name="app_name">RTLnotepad</string>
+	<string name="no_editor">Создайте или откройте файл, чтобы начать работу</string>
+	<string name="new_document">Новый документ</string>
+	<string name="new_file">Новый файл</string>
+	<string name="close_tab">Закрыть вкладку</string>
+	<string name="close_tab_warning">В этой вкладке есть несохранённые изменения. Сохранить их перед закрытием?</string>
+	<string name="apply">Применить</string>
+	<string name="encoding_error">Не удалось сменить кодировку.</string>
+	<string name="encoding_change_warning">В этом файле есть несохранённые изменения. При изменении кодировки они будут
+		потеряны. Продолжить?
+	</string>
+	<string name="file_save_error">Не удалось сохранить файл.</string>
+	<string name="wrong_file_type_warning">Это не текстовый файл. Продолжить?</string>
+</resources>

@@ -1,0 +1,45 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    
+	<item
+		android:id="@+id/options_new"
+		android:title="@string/new_file"/>
+	
+    <item
+        android:id="@+id/options_open"
+        android:title="@string/open"/>
+	
+	<item
+		android:id="@+id/options_last_files"
+        android:title="@string/last_files"/>
+	
+	<item
+		android:id="@+id/options_textSize"
+		android:title="@string/text_size">
+
+		<menu>
+			<group android:checkableBehavior="single">
+
+				<item android:id="@+id/options_textSize_small"
+					android:title="@string/text_small"/>
+				<item android:id="@+id/options_textSize_medium"
+					android:title="@string/text_medium"/>
+				<item android:id="@+id/options_textSize_large"
+					android:title="@string/text_large"/>
+			</group>
+		</menu>
+
+	</item>
+	
+	<item android:id="@+id/options_theme"
+		android:title="@string/theme">
+		<menu>
+			<group android:checkableBehavior="single">
+				<item android:id="@+id/options_theme_light"
+					android:title="@string/theme_light"/>
+				<item android:id="@+id/options_theme_dark"
+					android:title="@string/theme_dark"/>
+			</group>
+		</menu>
+	</item>
+    
+</menu>
