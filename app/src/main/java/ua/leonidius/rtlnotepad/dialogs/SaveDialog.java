@@ -6,7 +6,6 @@ import java.io.*;
 import ua.leonidius.rtlnotepad.*;
 import android.view.*;
 import android.content.*;
-import android.widget.AdapterView.*;
 import ua.leonidius.rtlnotepad.utils.*;
 import android.app.*;
 import java.nio.charset.*;
@@ -93,7 +92,9 @@ public class SaveDialog extends NavigationDialog implements AlertDialog.OnClickL
 									callback.callback(file);
 								}
 								catch (IOException e)
-								{}
+								{
+									Toast.makeText(activity, R.string.file_save_error, Toast.LENGTH_SHORT);
+								}
 								break;
 							case RewriteDialog.Callback.DONT_REWRITE:
 								// Re-opening saveDialog
@@ -120,7 +121,9 @@ public class SaveDialog extends NavigationDialog implements AlertDialog.OnClickL
 			FileWorker.write(file, text, encoding);
 		}
 		catch (IOException e)
-		{}
+		{
+			Toast.makeText(activity, R.string.file_save_error, Toast.LENGTH_SHORT);
+		}
 
 		callback.callback(file);
 	}

@@ -3,7 +3,6 @@ package ua.leonidius.rtlnotepad.dialogs;
 import android.os.*;
 import android.content.*;
 import ua.leonidius.rtlnotepad.*;
-import java.io.*;
 import android.app.*;
 
 public class RewriteDialog extends DialogFragment implements AlertDialog.OnClickListener
@@ -45,9 +44,9 @@ public class RewriteDialog extends DialogFragment implements AlertDialog.OnClick
 	}
 	
 	public interface Callback {
-		public static final byte REWRITE = 0x00, DONT_REWRITE = 0x01;
+		byte REWRITE = 0x00, DONT_REWRITE = 0x01;
 
-		public void callback(byte response);
+		void callback(byte response);
 	}
 	
 }

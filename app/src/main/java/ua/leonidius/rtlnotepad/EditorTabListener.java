@@ -1,9 +1,5 @@
 package ua.leonidius.rtlnotepad;
 import android.app.*;
-import android.app.ActionBar.*;
-import android.util.*;
-import android.widget.*;
-import android.os.*;
 
 public class EditorTabListener implements ActionBar.TabListener
 {

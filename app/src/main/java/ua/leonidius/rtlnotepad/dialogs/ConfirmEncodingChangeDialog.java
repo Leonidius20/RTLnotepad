@@ -43,9 +43,9 @@ public class ConfirmEncodingChangeDialog extends DialogFragment implements Alert
 	}
 
 	public interface Callback {
-		public static final byte CHANGE = 0x00, DONT_CHANGE = 0x01;
+		byte CHANGE = 0x00, DONT_CHANGE = 0x01;
 
-		public void callback(byte response);
+		void callback(byte response);
 	}
 
 }

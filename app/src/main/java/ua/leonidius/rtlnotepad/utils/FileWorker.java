@@ -1,13 +1,9 @@
 package ua.leonidius.rtlnotepad.utils;
 import java.io.*;
-import ua.leonidius.rtlnotepad.*;
-import android.app.*;
-import android.widget.*;
-import android.os.*;
 
 public abstract class FileWorker
 {
-	public static String read (File file, String encoding) throws FileNotFoundException, IOException {
+	public static String read (File file, String encoding) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), encoding));
 		StringBuilder sb = new StringBuilder();
 		while (true) {
@@ -18,7 +14,7 @@ public abstract class FileWorker
 		}
 	}
 	
-	public static void write (File file, String text, String encoding) throws FileNotFoundException, IOException {
+	public static void write (File file, String text, String encoding) throws IOException {
 		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), encoding));
 		bw.write(text);
 		bw.close();

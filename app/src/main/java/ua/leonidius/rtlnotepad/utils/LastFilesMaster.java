@@ -2,7 +2,6 @@ package ua.leonidius.rtlnotepad.utils;
 import java.io.*;
 import android.widget.*;
 import ua.leonidius.rtlnotepad.*;
-import java.util.prefs.*;
 import android.content.*;
 import java.util.*;
 import android.app.*;

@@ -43,8 +43,8 @@ public class WrongFileTypeDialog extends DialogFragment implements AlertDialog.O
 	}
 
 	public interface Callback {
-		public static final byte OPEN = 0x00, DONT_OPEN = 0x01;
+		byte OPEN = 0x00, DONT_OPEN = 0x01;
 
-		public void callback(byte response);
+		void callback(byte response);
 	}
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="save">Зберегти</string>
-	<string name="save_as">Зберегти як...</string>
+	<string name="save_as">Зберегти як…</string>
 	<string name="open">Відкрити</string>
 	<string name="done">Виконано</string>
 	<string name="ok">ОК</string>

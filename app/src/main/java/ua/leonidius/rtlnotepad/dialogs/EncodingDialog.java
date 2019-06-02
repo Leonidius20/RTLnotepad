@@ -3,10 +3,7 @@ import android.app.*;
 import android.os.*;
 import ua.leonidius.rtlnotepad.*;
 import android.widget.*;
-import android.widget.AdapterView.*;
-import android.view.*;
 import ua.leonidius.rtlnotepad.utils.*;
-import java.io.*;
 import java.nio.charset.*;
 import android.content.*;
 
@@ -52,7 +49,7 @@ public class EncodingDialog extends DialogFragment implements AlertDialog.OnClic
 	}
 
 	public interface Callback {
-		public void callback(String selectedEncoding);
+		void callback(String selectedEncoding);
 	}
 	
 }

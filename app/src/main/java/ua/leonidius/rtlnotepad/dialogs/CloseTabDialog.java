@@ -47,9 +47,9 @@ public class CloseTabDialog extends DialogFragment implements AlertDialog.OnClic
 	}
 
 	public interface Callback {
-		public static final byte SAVE = 0x00, DONT_SAVE = 0x01;
+		byte SAVE = 0x00, DONT_SAVE = 0x01;
 
-		public void callback(byte response);
+		void callback(byte response);
 	}
 
 }

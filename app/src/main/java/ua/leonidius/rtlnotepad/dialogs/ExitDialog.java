@@ -4,7 +4,6 @@ import android.os.*;
 import ua.leonidius.rtlnotepad.*;
 import android.content.*;
 import android.app.*;
-import android.view.*;
 
 public class ExitDialog extends DialogFragment implements AlertDialog.OnClickListener
 {
@@ -18,11 +17,7 @@ public class ExitDialog extends DialogFragment implements AlertDialog.OnClickLis
 	@Override
 	public void onClick(DialogInterface p1, int id)
 	{
-		switch (id) {
-			case Dialog.BUTTON_POSITIVE:
-				activity.finish();
-				break;
-		}
+		if (id == Dialog.BUTTON_POSITIVE) activity.finish();
 	}
 
 	@Override

@@ -28,10 +28,10 @@ public abstract class AdapterFactory
 
 		ArrayList <Map<String, Object>> data = new ArrayList <Map<String, Object>>();
 		Map <String, Object> m;
-		for (int i=0; i<files.length; i++) {
+		for (Object file : files) {
 			m = new HashMap<String, Object>();
-			m.put("name", ((File)files[i]).getName());
-			if (((File)files[i]).isDirectory()) m.put("icon", R.drawable.folder);
+			m.put("name", ((File) file).getName());
+			if (((File) file).isDirectory()) m.put("icon", R.drawable.folder);
 			else m.put("icon", R.drawable.file);
 			data.add(m);
 		}

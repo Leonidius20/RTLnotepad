@@ -45,7 +45,7 @@ public class TestActivity extends Activity
 		}
 		
 		// Opening a file from intent
-		String path = null;
+		String path;
 		try {
 			path = getIntent().getData().getSchemeSpecificPart();
 			if (path!=null) addTab(new File(path));
@@ -223,38 +223,6 @@ public class TestActivity extends Activity
 			}
 		}
 		super.onBackPressed();
-	}
-	
-	/*private void openSaveDialog() {
-		SaveDialog saveDialog = new SaveDialog(this);
-		saveDialog.setCallback(new SaveDialog.Callback() {
-				@Override
-				public void callback(File file)
-				{
-					ActionBar.Tab selectedTab = getActionBar().getSelectedTab();
-					selectedTab.setText(file.getName());
-					EditorFragment fragment = (EditorFragment)selectedTab.getTag();
-					fragment.file = file;
-					fragment.setTextChanged(false);
-					LastFilesMaster.add(file);
-				}
-			});
-		saveDialog.show(getFragmentManager(), "saveDialog");
-	}*/
-	
-	private void saveChanges() {
-		EditorFragment selectedTabFragment = (EditorFragment)getActionBar().getSelectedTab().getTag();
-		String text = selectedTabFragment.getEditor().getText().toString();
-		String encoding = selectedTabFragment.currentEncoding;
-		try
-		{
-			FileWorker.write(selectedTabFragment.file, text, encoding);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-		selectedTabFragment.setTextChanged(false);
 	}
 	
 	private ActionBar.Tab getFileTab(File file) {

@@ -2,8 +2,6 @@ package ua.leonidius.rtlnotepad.utils;
 import android.widget.*;
 import android.view.*;
 import android.content.*;
-import java.util.*;
-import android.widget.SimpleAdapter.*;
 import ua.leonidius.rtlnotepad.*;
 
 public class EncodingAdapter extends ArrayAdapter

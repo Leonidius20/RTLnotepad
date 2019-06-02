@@ -56,7 +56,7 @@ public abstract class NavigationDialog extends DialogFragment implements OnItemC
 		else onFileClick(file);
 	}
 
-	protected void onFileClick(File file) {};
+	protected void onFileClick(File file) {}
 	
 	protected void openDir(File directory) {
 		try {

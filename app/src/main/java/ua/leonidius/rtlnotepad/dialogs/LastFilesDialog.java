@@ -3,7 +3,6 @@ import android.os.*;
 import ua.leonidius.rtlnotepad.*;
 import android.widget.*;
 import android.view.*;
-import java.io.*;
 import ua.leonidius.rtlnotepad.utils.*;
 import android.app.*;
 
@@ -38,7 +37,7 @@ public class LastFilesDialog extends DialogFragment implements AdapterView.OnIte
 	}
 	
 	public interface Callback {
-		public void callback(String path);
+		void callback(String path);
 	}
 	
 }
