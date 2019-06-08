@@ -40,4 +40,6 @@
 	</string>
 	<string name="file_save_error">Не удалось сохранить файл.</string>
 	<string name="wrong_file_type_warning">Это не текстовый файл. Продолжить?</string>
+    <string name="processing">Обработка…</string>
+    <string name="do_in_background">В фон</string>
 </resources>

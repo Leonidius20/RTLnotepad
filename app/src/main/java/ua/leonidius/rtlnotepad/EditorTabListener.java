@@ -1,5 +1,8 @@
 package ua.leonidius.rtlnotepad;
-import android.app.*;
+
+import android.app.ActionBar;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 
 public class EditorTabListener implements ActionBar.TabListener
 {
@@ -8,7 +11,7 @@ public class EditorTabListener implements ActionBar.TabListener
 	public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft)
 	{
 		EditorFragment fragment = (EditorFragment)tab.getTag();
-		FragmentTransaction ft2 = TestActivity.getInstance().getFragmentManager().beginTransaction();
+		FragmentTransaction ft2 = MainActivity.getInstance().getFragmentManager().beginTransaction();
 		ft2.add(android.R.id.content, fragment, fragment.mTag);
 		ft2.attach(fragment);
 		ft2.commitAllowingStateLoss();
@@ -17,7 +20,7 @@ public class EditorTabListener implements ActionBar.TabListener
 	@Override
 	public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft)
 	{
-		FragmentTransaction ft2 = TestActivity.getInstance().getFragmentManager().beginTransaction();
+		FragmentTransaction ft2 = MainActivity.getInstance().getFragmentManager().beginTransaction();
 		Fragment fragment = (EditorFragment)tab.getTag();
 		ft2.detach(fragment);
 		ft2.commitAllowingStateLoss();

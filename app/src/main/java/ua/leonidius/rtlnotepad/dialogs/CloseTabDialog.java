@@ -1,8 +1,12 @@
 package ua.leonidius.rtlnotepad.dialogs;
-import android.app.*;
-import android.content.*;
-import android.os.*;
-import ua.leonidius.rtlnotepad.*;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import ua.leonidius.rtlnotepad.R;
 
 /**
 	This dialog is showed when user tries to close a tab with unsaved changes.
@@ -34,10 +38,10 @@ public class CloseTabDialog extends DialogFragment implements AlertDialog.OnClic
 	{
 		switch (id) {
 			case Dialog.BUTTON_NEGATIVE:
-				callback.callback(Callback.DONT_SAVE);
+				callback.callback(false);
 				break;
 			case Dialog.BUTTON_POSITIVE:
-				callback.callback(Callback.SAVE);
+				callback.callback(true);
 				break;
 		}
 	}
@@ -47,9 +51,7 @@ public class CloseTabDialog extends DialogFragment implements AlertDialog.OnClic
 	}
 
 	public interface Callback {
-		byte SAVE = 0x00, DONT_SAVE = 0x01;
-
-		void callback(byte response);
+		void callback(boolean save);
 	}
 
 }

@@ -1,10 +1,15 @@
 package ua.leonidius.rtlnotepad.utils;
-import java.io.*;
-import android.widget.*;
-import ua.leonidius.rtlnotepad.*;
-import android.content.*;
-import java.util.*;
-import android.app.*;
+
+import android.app.Activity;
+import android.content.SharedPreferences;
+import android.widget.SimpleAdapter;
+import ua.leonidius.rtlnotepad.MainActivity;
+import ua.leonidius.rtlnotepad.R;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
 * This class manages the list of last opened files.
@@ -55,7 +60,7 @@ public abstract class LastFilesMaster
 	}
 	
 	// Gets recent files saved in Preferences. Called in the onCreate() of the main activity
-	public static void initSlots (TestActivity activity) {
+	public static void initSlots (MainActivity activity) {
 		String path;
 		File file;
 		for (int i = 0; i < slots.length; i++) {
@@ -68,7 +73,7 @@ public abstract class LastFilesMaster
 	}
 	
 	// Saves recent files to the preferences. Called in main activity's onSaveInstanceState()
-	public static void saveSlots (TestActivity context) {
+	public static void saveSlots (MainActivity context) {
 		SharedPreferences.Editor edit = context.pref.edit();
 		for (int i=0; i<slots.length; i++) {
 			if (slots[i] == null || (!slots[i].exists())) edit.putString(slot_names[i], EMPTY);

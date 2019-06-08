@@ -1,17 +1,22 @@
 package ua.leonidius.rtlnotepad.dialogs;
-import android.app.*;
-import android.content.*;
-import android.os.*;
-import ua.leonidius.rtlnotepad.*;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import ua.leonidius.rtlnotepad.R;
 
 public class WrongFileTypeDialog extends DialogFragment implements AlertDialog.OnClickListener
 {
 	private Callback callback;
 	private Activity activity;
 
-	public WrongFileTypeDialog(Activity activity) {
+	public WrongFileTypeDialog(Activity activity, Callback callback) {
 		super();
 		this.activity = activity;
+		this.callback = callback;
 	}
 
 	@Override
@@ -19,10 +24,10 @@ public class WrongFileTypeDialog extends DialogFragment implements AlertDialog.O
 	{
 		switch (id) {
 			case Dialog.BUTTON_NEGATIVE:
-				callback.callback(Callback.DONT_OPEN);
+				callback.callback(false);
 				break;
 			case Dialog.BUTTON_POSITIVE:
-				callback.callback(Callback.OPEN);
+				callback.callback(true);
 				break;
 		}
 	}
@@ -38,13 +43,8 @@ public class WrongFileTypeDialog extends DialogFragment implements AlertDialog.O
 		return adb.create();
 	}
 
-	public void setCallback(Callback callback) {
-		this.callback = callback;
-	}
-
 	public interface Callback {
-		byte OPEN = 0x00, DONT_OPEN = 0x01;
-
-		void callback(byte response);
+		void callback(boolean open);
 	}
+
 }

@@ -43,5 +43,7 @@
 	<string name="progress_writing">Writing file...</string>
 	-->
 	<string name="reading_error">Failed to read the file.</string>
+	<string name="processing">Processing…</string>
+	<string name="do_in_background">Do in background</string>
 
 </resources>

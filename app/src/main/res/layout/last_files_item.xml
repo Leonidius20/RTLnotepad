@@ -1,34 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent"
-	android:layout_height="wrap_content"
-	android:orientation="horizontal">
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal">
 
 	<ImageView
-		android:layout_height="45dp"
-		android:layout_width="45dp"
-		android:id="@+id/lastFilesItem_image"/>
+			android:paddingStart="10dp"
+			android:paddingEnd="10dp"
+			android:layout_height="45dp"
+			android:layout_width="45dp"
+			android:id="@+id/lastFilesItem_image"/>
 
 	<LinearLayout
-		android:layout_height="match_parent"
-		android:layout_width="match_parent"
-		android:orientation="vertical">
+			android:layout_height="match_parent"
+			android:layout_width="match_parent"
+			android:orientation="vertical">
 
 		<TextView
-			android:layout_height="wrap_content"
-			android:textAppearance="?android:attr/textAppearanceMedium"
-			android:layout_width="match_parent"
-			android:id="@+id/lastFilesItem_name"
-			android:paddingLeft="10dp"
-			android:paddingRight="10dp"/>
+				android:layout_height="wrap_content"
+				android:textAppearance="?android:attr/textAppearanceMedium"
+				android:layout_width="match_parent"
+				android:id="@+id/lastFilesItem_name"
+				android:paddingLeft="10dp"
+				android:paddingRight="10dp"
+				android:singleLine="true"
+				android:ellipsize="end"/>
 
 		<TextView
-			android:layout_height="wrap_content"
-			android:layout_width="match_parent"
-			android:id="@+id/lastFilesItem_path"
-			android:paddingLeft="10dp"
-			android:paddingRight="10dp"/>
+				android:layout_height="wrap_content"
+				android:layout_width="match_parent"
+				android:id="@+id/lastFilesItem_path"
+				android:paddingLeft="10dp"
+				android:paddingRight="10dp"
+				android:singleLine="true"
+				android:ellipsize="middle"/>
 
 	</LinearLayout>
 

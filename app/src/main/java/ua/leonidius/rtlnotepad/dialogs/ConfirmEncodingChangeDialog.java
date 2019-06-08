@@ -1,8 +1,12 @@
 package ua.leonidius.rtlnotepad.dialogs;
-import android.app.*;
-import android.content.*;
-import android.os.*;
-import ua.leonidius.rtlnotepad.*;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import ua.leonidius.rtlnotepad.R;
 
 public class ConfirmEncodingChangeDialog extends DialogFragment implements AlertDialog.OnClickListener
 {
@@ -30,10 +34,10 @@ public class ConfirmEncodingChangeDialog extends DialogFragment implements Alert
 	{
 		switch (id) {
 			case Dialog.BUTTON_NEGATIVE:
-				callback.callback(Callback.DONT_CHANGE);
+				callback.callback(false);
 				break;
 			case Dialog.BUTTON_POSITIVE:
-				callback.callback(Callback.CHANGE);
+				callback.callback(true);
 				break;
 		}
 	}
@@ -43,9 +47,7 @@ public class ConfirmEncodingChangeDialog extends DialogFragment implements Alert
 	}
 
 	public interface Callback {
-		byte CHANGE = 0x00, DONT_CHANGE = 0x01;
-
-		void callback(byte response);
+		void callback(boolean change);
 	}
 
 }

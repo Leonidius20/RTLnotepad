@@ -1,26 +1,34 @@
 package ua.leonidius.rtlnotepad.dialogs;
 
-import android.os.*;
-import android.widget.*;
-import java.io.*;
-import ua.leonidius.rtlnotepad.*;
-import android.view.*;
-import android.content.*;
-import ua.leonidius.rtlnotepad.utils.*;
-import android.app.*;
-import java.nio.charset.*;
-import java.util.*;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.SimpleAdapter;
+import android.widget.Spinner;
+import ua.leonidius.rtlnotepad.MainActivity;
+import ua.leonidius.rtlnotepad.R;
+
+import java.io.File;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SaveDialog extends NavigationDialog implements AlertDialog.OnClickListener
 {
 	private EditText nameField;
 	private Spinner encodingSpinner;
 	private Callback callback;
-	private EditorFragment fragment;
-	
-	public SaveDialog(TestActivity activity, EditorFragment fragment) {
-		super(activity);
-		this.fragment = fragment;
+	private String currentEncoding;
+	private Object[] availableEncodings;
+
+	public SaveDialog (String currentEncoding, Callback callback) {
+		super(MainActivity.getInstance());
+		this.currentEncoding = currentEncoding;
+		this.callback = callback;
 	}
 	
 	@Override
@@ -37,24 +45,27 @@ public class SaveDialog extends NavigationDialog implements AlertDialog.OnClickL
 		
 		// Setting up Spinner with encodings
 		encodingSpinner = dialogView.findViewById(R.id.saveasdialog_encoding_spinner);
-		int currentEncondingPosition = 0;
-		ArrayList <Map<String, Object>> data = new ArrayList <Map<String, Object>>();
+		int currentEncodingPosition = 0;
+		ArrayList <Map<String, Object>> data = new ArrayList<>();
 		Map <String, Object> m;
-		Object[] encodings = Charset.availableCharsets().keySet().toArray();
-		for (int i = 0; i < encodings.length; i++) {
-			m = new HashMap<String, Object>();
-			m.put("name", (String)encodings[i]);
-			String encoding = (String)encodings[i];
-			if (encoding.equalsIgnoreCase(fragment.currentEncoding)) {
-				currentEncondingPosition = i;
+
+		availableEncodings = Charset.availableCharsets().keySet().toArray();
+
+		for (int i = 0; i < availableEncodings.length; i++) {
+			String encoding = availableEncodings[i].toString();
+			m = new HashMap<>();
+			m.put("name", encoding);
+			if (encoding.equalsIgnoreCase(currentEncoding)) {
+				currentEncodingPosition = i;
 			}
 			data.add(m);
 		}
 		String[] from = {"name"};
 		int[] to = {android.R.id.text1};
-		
+
+		// TODO: there is EncodingAdapter in AdapterFactory, maybe use it instead?
 		encodingSpinner.setAdapter(new SimpleAdapter(activity, data, android.R.layout.simple_list_item_1, from, to));
-		encodingSpinner.setSelection(currentEncondingPosition);
+		encodingSpinner.setSelection(currentEncodingPosition);
 		
 		adb.setView(dialogView);
 		
@@ -72,68 +83,37 @@ public class SaveDialog extends NavigationDialog implements AlertDialog.OnClickL
 	public void onClick(DialogInterface p1, int p2)
 	{
 		final File file = new File(currentDir.getPath()+"/"+nameField.getText());
-		final String encoding = ((TextView)encodingSpinner.getSelectedView()).getText().toString();
-		final String text = fragment.getEditor().getText().toString();
+		final String encoding = availableEncodings[encodingSpinner.getSelectedItemPosition()].toString();
 		
 		final File openDir = currentDir; // Saving currentDir for re-opening the dialog
 		final String nameFieldContents = nameField.getText().toString(); // Saving chosen file name
 		
 		if (file.exists()) {
-			RewriteDialog rewriteDialog = new RewriteDialog(activity);
-			rewriteDialog.setCallback(new RewriteDialog.Callback() {
-					@Override
-					public void callback(byte response)
-					{
-						switch (response) {
-							case RewriteDialog.Callback.REWRITE:
-								try
-								{
-									FileWorker.write(file, text, encoding);
-									callback.callback(file);
-								}
-								catch (IOException e)
-								{
-									Toast.makeText(activity, R.string.file_save_error, Toast.LENGTH_SHORT);
-								}
-								break;
-							case RewriteDialog.Callback.DONT_REWRITE:
-								// Re-opening saveDialog
-								// Adding currentDir and name field content as args
-								Bundle args = new Bundle();
-								args.putSerializable("currentDir", openDir);
-								args.putString("fileName", nameFieldContents);
-								setArguments(args);
-								show(activity.getFragmentManager(), "saveDialog");
-								//openDir(openDir);
-								//nameField.setText(nameFieldContents);
-								break;
-						}
-					}
+			RewriteDialog rewriteDialog = new RewriteDialog(activity, rewrite -> {
+				if (rewrite) callback.call(file, encoding);
+				else {
+					// Re-opening saveDialog
+					// Adding currentDir and name field content as args
+					// TODO: figure out a better way
+					Bundle args = new Bundle();
+					args.putSerializable("currentDir", openDir);
+					args.putString("fileName", nameFieldContents);
+					setArguments(args);
+					show(activity.getFragmentManager(), "saveDialog");
+				}
 			});
-			rewriteDialog.show(activity.getFragmentManager(), "rewriteDialog");
-			return;
-		}
-		
-		// Writing
-		//save(file, encoding, exitAfterSave, openAfterSave);
-		try
-		{
-			FileWorker.write(file, text, encoding);
-		}
-		catch (IOException e)
-		{
-			Toast.makeText(activity, R.string.file_save_error, Toast.LENGTH_SHORT);
-		}
-
-		callback.callback(file);
-	}
-	
-	public void setCallback(Callback callback) {
-		this.callback = callback;
+			rewriteDialog.show(activity.getFragmentManager(), "rewriteDialog"); // try to show rewriteDialog with Frag's own manager
+		} else callback.call(file, encoding);
 	}
 	
 	public interface Callback {
-		void callback(File file);
+		/**
+		 * Gets called if a user has selected a file to write the text into and an encoding.
+		 * Doesn't get called if the user dismisses the dialog.
+		 * @param file File to which the user decided to write the text
+		 * @param encoding Encoding to use to write the file
+		 */
+		void call(File file, String encoding);
 	}
 
 }

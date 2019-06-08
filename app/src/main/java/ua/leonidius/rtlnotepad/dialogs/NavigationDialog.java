@@ -1,23 +1,26 @@
 // A base for OpenDialog and SaveDialog
 package ua.leonidius.rtlnotepad.dialogs;
 
-import android.app.*;
+import android.app.DialogFragment;
+import android.os.Bundle;
+import android.os.Environment;
+import android.view.View;
 import android.widget.*;
-import java.io.*;
-import android.widget.AdapterView.*;
-import android.view.*;
-import android.os.*;
-import ua.leonidius.rtlnotepad.*;
-import ua.leonidius.rtlnotepad.utils.*;
+import android.widget.AdapterView.OnItemClickListener;
+import ua.leonidius.rtlnotepad.MainActivity;
+import ua.leonidius.rtlnotepad.R;
+import ua.leonidius.rtlnotepad.utils.AdapterFactory;
+
+import java.io.File;
 
 public abstract class NavigationDialog extends DialogFragment implements OnItemClickListener
 {
 	private TextView pathView;
 	private ListView filesList;
 	protected File currentDir;
-	protected TestActivity activity;
+	protected MainActivity activity;
 	
-	public NavigationDialog(TestActivity activity) {
+	public NavigationDialog(MainActivity activity) {
 		super();
 		this.activity = activity;
 	}
@@ -43,7 +46,7 @@ public abstract class NavigationDialog extends DialogFragment implements OnItemC
 	@Override
 	public void onItemClick(AdapterView<?> p1, View item, int position, long p4)
 	{
-		if (position==0) {
+		if (position == 0) {
 			up();
 			return;
 		}

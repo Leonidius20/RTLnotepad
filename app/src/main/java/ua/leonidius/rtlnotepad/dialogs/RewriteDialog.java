@@ -1,18 +1,22 @@
 package ua.leonidius.rtlnotepad.dialogs;
 
-import android.os.*;
-import android.content.*;
-import ua.leonidius.rtlnotepad.*;
-import android.app.*;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import ua.leonidius.rtlnotepad.R;
 
 public class RewriteDialog extends DialogFragment implements AlertDialog.OnClickListener
 {
 	private Callback callback;
 	private Activity activity;
 	
-	public RewriteDialog(Activity activity) {
+	public RewriteDialog(Activity activity, Callback callback) {
 		super();
 		this.activity = activity;
+		this.callback = callback;
 	}
 	
 	@Override
@@ -20,10 +24,10 @@ public class RewriteDialog extends DialogFragment implements AlertDialog.OnClick
 	{
 		switch (id) {
 			case Dialog.BUTTON_NEGATIVE:
-				callback.callback(Callback.DONT_REWRITE);
+				callback.callback(false);
 				break;
 			case Dialog.BUTTON_POSITIVE:
-				callback.callback(Callback.REWRITE);
+				callback.callback(true);
 				break;
 		}
 	}
@@ -39,14 +43,8 @@ public class RewriteDialog extends DialogFragment implements AlertDialog.OnClick
 		return adb.create();
 	}
 	
-	public void setCallback(Callback callback) {
-		this.callback = callback;
-	}
-	
 	public interface Callback {
-		byte REWRITE = 0x00, DONT_REWRITE = 0x01;
-
-		void callback(byte response);
+		void callback(boolean rewrite);
 	}
 	
 }

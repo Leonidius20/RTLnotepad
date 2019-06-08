@@ -1,18 +1,23 @@
 package ua.leonidius.rtlnotepad.dialogs;
-import android.app.*;
-import android.net.*;
-import android.os.*;
-import android.view.*;
-import android.webkit.*;
-import java.io.*;
-import ua.leonidius.rtlnotepad.*;
+
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.net.Uri;
+import android.os.Bundle;
+import android.view.View;
+import android.webkit.MimeTypeMap;
+import ua.leonidius.rtlnotepad.MainActivity;
+import ua.leonidius.rtlnotepad.R;
+
+import java.io.File;
 
 public class OpenDialog extends NavigationDialog
 {
 	Callback callback;
 	
-	public OpenDialog(TestActivity activity) {
+	public OpenDialog(MainActivity activity, Callback callback) {
 		super(activity);
+		this.callback = callback;
 	}
 	
 	@Override
@@ -31,19 +36,14 @@ public class OpenDialog extends NavigationDialog
 	}
 	
 	@Override
-	protected void onFileClick(final File file)
+	protected void onFileClick(File file)
 	{
 		if (!isText(file)) {
-			WrongFileTypeDialog wftd = new WrongFileTypeDialog(activity);
-			wftd.setCallback(new WrongFileTypeDialog.Callback() {
-					@Override
-					public void callback(byte response)
-					{
-						if (response == OPEN) {
-							callback.callback(file);
-							getDialog().cancel();
-						}
-					}
+			WrongFileTypeDialog wftd = new WrongFileTypeDialog(activity, open -> {
+				if (open) {
+					callback.callback(file);
+					getDialog().cancel();
+				}
 			});
 			wftd.show(activity.getFragmentManager(), "wrongFileTypeDialog");
 			return;
@@ -59,12 +59,7 @@ public class OpenDialog extends NavigationDialog
 		} catch (Exception e) {return false;}
 	}
 	
-	public void setCallback(Callback callback) {
-		this.callback = callback;
-	}
-	
-	public interface Callback
-	{
+	public interface Callback {
 		void callback(File file);
 	}
 	

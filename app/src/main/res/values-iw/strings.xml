@@ -39,5 +39,7 @@
 	<string name="file_save_error">Failed to save the file.</string>
 	<string name="wrong_file_type_warning">This is not a text file. Proceed?</string>
     <string name="reading_error">Failed to read the file.</string>
+    <string name="processing">Processing…</string>
+    <string name="do_in_background">Do in background</string>
 
 </resources>
