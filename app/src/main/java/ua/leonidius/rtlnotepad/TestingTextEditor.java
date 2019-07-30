@@ -44,4 +44,5 @@ public class TestingTextEditor extends View {
         if (layout != null) layout.draw(canvas);
         canvas.restore();
     }
+
 }

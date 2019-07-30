@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="up">Вгору</string>
+    <string name="folder_open_error">Неможливо відкрити папку.</string>
+    <string name="open">Відкрити</string>
+    <string name="save_as">Зберегти як…</string>
+    <string name="file_overwrite">Цей файл вже існує. Перезаписати?</string>
+</resources>

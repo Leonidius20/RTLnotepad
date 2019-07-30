@@ -1,35 +1,37 @@
 package ua.leonidius.rtlnotepad.dialogs;
-import android.app.*;
-import android.os.*;
-import ua.leonidius.rtlnotepad.*;
-import android.widget.*;
-import ua.leonidius.rtlnotepad.utils.*;
-import java.nio.charset.*;
-import android.content.*;
+
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.widget.ListView;
+import ua.leonidius.rtlnotepad.MainActivity;
+import ua.leonidius.rtlnotepad.R;
+import ua.leonidius.rtlnotepad.utils.EncodingAdapter;
+
+import java.nio.charset.Charset;
 
 public class EncodingDialog extends DialogFragment implements AlertDialog.OnClickListener
 {
 	private Callback callback;
-	private EditorFragment fragment;
-	private Activity context;
 	private EncodingAdapter adapter;
 
-	public EncodingDialog(Activity context, EditorFragment fragment) {
-		super();
-		this.context = context;
-		this.fragment = fragment;
-	}
+	public static final String ARGS_ENCODING = "currentEncoding";
 
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState)
 	{
-		AlertDialog.Builder adb = new AlertDialog.Builder(context);
+		String currentEncoding = getArguments().getString(ARGS_ENCODING, "UTF-8");
+		// TODO: check if that works
+
+		AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.getInstance());
 		adb.setTitle(R.string.encoding);
 		adb.setPositiveButton(R.string.apply, this);
 		adb.setNegativeButton(R.string.cancel, this);
 		
-		ListView listView = new ListView(context);
-		adapter = new EncodingAdapter(context, Charset.availableCharsets().keySet().toArray(), fragment.currentEncoding);
+		ListView listView = new ListView(MainActivity.getInstance());
+		adapter = new EncodingAdapter(MainActivity.getInstance(), Charset.availableCharsets().keySet().toArray(), currentEncoding);
 		listView.setAdapter(adapter);
 		adb.setView(listView);
 		

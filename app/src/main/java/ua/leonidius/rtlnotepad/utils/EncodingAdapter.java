@@ -1,8 +1,13 @@
 package ua.leonidius.rtlnotepad.utils;
-import android.widget.*;
-import android.view.*;
-import android.content.*;
-import ua.leonidius.rtlnotepad.*;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.RadioButton;
+import android.widget.TextView;
+import ua.leonidius.rtlnotepad.R;
 
 public class EncodingAdapter extends ArrayAdapter
 {
@@ -24,7 +29,7 @@ public class EncodingAdapter extends ArrayAdapter
 		
 		if (view == null) {
 			LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			view = inflater.inflate(R.layout.encoding_list_item, null);
+			view = inflater.inflate(R.layout.encoding_list_item, null, false);
 		}
 		
 		TextView tv = view.findViewById(R.id.radio_text);
@@ -34,14 +39,11 @@ public class EncodingAdapter extends ArrayAdapter
 		String encoding = (String)data[position];
 		r.setChecked(encoding.equalsIgnoreCase(selectedEncoding));
 		
-		r.setTag((String)data[position]);
+		r.setTag(data[position]);
 		
-		r.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				selectedEncoding = (String)view.getTag();
-				notifyDataSetChanged();
-			}
+		r.setOnClickListener(clickedView -> {
+			selectedEncoding = (String)clickedView.getTag();
+			notifyDataSetChanged();
 		});
 		
 		return view;

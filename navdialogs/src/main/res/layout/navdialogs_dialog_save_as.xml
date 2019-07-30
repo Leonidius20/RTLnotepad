@@ -11,22 +11,14 @@
 		android:ems="10"
 		android:text=".txt"
 		android:textDirection="anyRtl"
-		android:id="@+id/saveasdialog_name"/>
+		android:id="@+id/saveasdialog_name"
+		android:inputType="textUri"/>
 
 	<Spinner
 		android:layout_height="wrap_content"
 		android:layout_width="match_parent"
 		android:id="@+id/saveasdialog_encoding_spinner"/>
 
-	<TextView
-		android:layout_height="wrap_content"
-		android:layout_width="match_parent"
-		android:id="@+id/pathview"/>
-
-	<ListView
-		android:layout_height="match_parent"
-		android:layout_width="match_parent"
-		android:id="@+id/listview"/>
+	<include layout="@layout/navdialogs_filesystem_navigation"/>
 
 </LinearLayout>
-

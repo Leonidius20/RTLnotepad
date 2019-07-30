@@ -5,13 +5,10 @@
 	<string name="open">Открыть</string>
 	<string name="done">Выполнено</string>
 	<string name="ok">ОК</string>
-	<string name="up">Вверх</string>
-	<string name="file_overwrite">Этот файл уже существует. Перезаписать?</string>
-	<string name="no">Нет</string>
+    <string name="no">Нет</string>
 	<string name="yes">Да</string>
 	<string name="cancel">Отмена</string>
-	<string name="folder_open_error">Невозможно открыть папку.</string>
-	<string name="text_size">Размер шрифта</string>
+    <string name="text_size">Размер шрифта</string>
 	<string name="theme">Тема</string>
 	<string name="theme_light">Светлая</string>
 	<string name="theme_dark">Тёмная</string>
@@ -42,4 +39,5 @@
 	<string name="wrong_file_type_warning">Это не текстовый файл. Продолжить?</string>
     <string name="processing">Обработка…</string>
     <string name="do_in_background">В фон</string>
+    <string name="file_save_success">Файл %1$s успешно сохранён.</string>
 </resources>

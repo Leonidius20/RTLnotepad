@@ -1,32 +1,29 @@
 package ua.leonidius.rtlnotepad;
 
 import android.app.ActionBar;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
+import androidx.fragment.app.FragmentTransaction;
 
-public class EditorTabListener implements ActionBar.TabListener
-{
-	
-	@Override
-	public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft)
-	{
-		EditorFragment fragment = (EditorFragment)tab.getTag();
-		FragmentTransaction ft2 = MainActivity.getInstance().getFragmentManager().beginTransaction();
-		ft2.add(android.R.id.content, fragment, fragment.mTag);
-		ft2.attach(fragment);
-		ft2.commitAllowingStateLoss();
-	}
+public class EditorTabListener implements ActionBar.TabListener {
 
-	@Override
-	public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft)
-	{
-		FragmentTransaction ft2 = MainActivity.getInstance().getFragmentManager().beginTransaction();
-		Fragment fragment = (EditorFragment)tab.getTag();
-		ft2.detach(fragment);
-		ft2.commitAllowingStateLoss();
-	}
+    @Override
+    public void onTabSelected(ActionBar.Tab tab, android.app.FragmentTransaction ft) {
+        EditorFragment fragment = (EditorFragment) tab.getTag();
+        FragmentTransaction ft2 = MainActivity.getInstance().getSupportFragmentManager().beginTransaction();
+        if (!fragment.isAdded()) ft2.add(android.R.id.content, fragment, fragment.mTag);
+        ft2.attach(fragment);
+        ft2.commitAllowingStateLoss();
+    }
 
-	@Override
-	public void onTabReselected(ActionBar.Tab p1, FragmentTransaction p2) {}
+    @Override
+    public void onTabUnselected(ActionBar.Tab tab, android.app.FragmentTransaction ft) {
+        FragmentTransaction ft2 = MainActivity.getInstance().getSupportFragmentManager().beginTransaction();
+        EditorFragment fragment = (EditorFragment) tab.getTag();
+        ft2.detach(fragment);
+        ft2.commitAllowingStateLoss();
+    }
+
+    @Override
+    public void onTabReselected(ActionBar.Tab p1, android.app.FragmentTransaction p2) {
+    }
 
 }

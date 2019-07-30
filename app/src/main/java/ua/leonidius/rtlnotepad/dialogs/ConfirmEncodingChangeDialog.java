@@ -1,27 +1,21 @@
 package ua.leonidius.rtlnotepad.dialogs;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import ua.leonidius.rtlnotepad.MainActivity;
 import ua.leonidius.rtlnotepad.R;
 
 public class ConfirmEncodingChangeDialog extends DialogFragment implements AlertDialog.OnClickListener
 {
 	private Callback callback;
-	private Activity activity;
-
-	public ConfirmEncodingChangeDialog(Activity activity) {
-		super();
-		this.activity = activity;
-	}
 
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState)
 	{
-		AlertDialog.Builder adb = new AlertDialog.Builder(activity);
+		AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.getInstance());
 		adb.setMessage(R.string.encoding_change_warning);
 		adb.setNegativeButton(R.string.no, this);
 		adb.setPositiveButton(R.string.yes, this);

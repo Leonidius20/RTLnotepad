@@ -11,17 +11,58 @@ public abstract class FileWorker
 	private static LoadingDialog dialog = null;
 
 	/**
+	 * Writes a file to the disk using FileWorker.WriteTask
+	 * @param file File to write into
+	 * @param text Text to write into the file
+	 * @param encoding Encoding to use
+	 * @param callback Defines what to do after the writing.
+	 */
+	public static void writeFile(File file, String text, String encoding, WriteCallback callback) {
+		FileWorker.WriteTask task = new FileWorker.WriteTask(file, text, encoding, callback::call);
+		task.execute();
+	}
+
+	public interface WriteCallback {
+		void call(boolean success);
+	}
+
+	/**
+	 * Reads a specified file and sets its contents as a text to the editor.
+	 * Shows a Toast if the reading fails.
+	 * @param file File to read
+	 * @param encoding Encoding to use for decoding of the file
+	 */
+	public static void readFile(File file, String encoding, ReadCallback callback) {
+		/*FileWorker.ReadTask task = new FileWorker.ReadTask(file, encoding, result -> {
+			if (result == null) {
+				Toast.makeText(mActivity, R.string.reading_error, Toast.LENGTH_SHORT).show();
+				callback.call(false);
+			} else {
+				editor.setText(result); // Takes a lot of time for big texts. Most of it
+				setTextChanged(false);
+				callback.call(true);
+			}
+		});*/
+		FileWorker.ReadTask task = new FileWorker.ReadTask(file, encoding, callback::call);
+		task.execute();
+	}
+
+	public interface ReadCallback {
+		void call(boolean success, String result);
+	}
+
+	/**
 	 * Used for asynchronous reading of a file into a string. The string is returned via
 	 * a callback. If failed to read the file, the resulting string would be null.
 	 * Shows a dialog with a progress bar.
 	 */
-	public static class ReadTask extends AsyncTask<Void, Void, String> {
+	private static class ReadTask extends AsyncTask<Void, Void, String> {
 
 		private File file;
 		private String encoding;
 		private Callback callback;
 
-		public ReadTask(File file, String encoding, Callback callback) {
+		ReadTask(File file, String encoding, Callback callback) {
 			this.file = file;
 			this.encoding = encoding;
 			this.callback = callback;
@@ -30,7 +71,7 @@ public abstract class FileWorker
 		@Override
 		protected void onPreExecute() {
 			dialog = new LoadingDialog();
-			dialog.show(MainActivity.getInstance().getFragmentManager(), "readingDialog");
+			dialog.show(MainActivity.getInstance().getSupportFragmentManager(), "readingDialog");
 		}
 
 		@Override
@@ -54,18 +95,19 @@ public abstract class FileWorker
 		protected void onPostExecute(String result) {
 			dialog.dismiss();
 			dialog = null;
-			callback.call(result);
+			callback.call(result != null, result);
 		}
 
 		@Override
 		protected void onCancelled() {
 			dialog.dismiss();
 			dialog = null;
-			callback.call(null);
+			// TODO: notify that it was cancelled
+			callback.call(false, null);
 		}
 
 		public interface Callback {
-			void call(String result);
+			void call(boolean success, String result);
 		}
 
 	}
@@ -74,14 +116,14 @@ public abstract class FileWorker
 	 * Used for asynchronous writing of a string into a file. The result is returned via a callback
 	 * (false if failed to write, true if succeeded). Shows a dialog with a progress bar.
 	 */
-	public static class WriteTask extends AsyncTask<Void, Void, Boolean> {
+	private static class WriteTask extends AsyncTask<Void, Void, Boolean> {
 
 		private File file;
 		private String text;
 		private String encoding;
 		private Callback callback;
 
-		public WriteTask(File file, String text, String encoding, Callback callback) {
+		WriteTask(File file, String text, String encoding, Callback callback) {
 			this.file = file;
 			this.text = text;
 			this.encoding = encoding;
@@ -91,7 +133,8 @@ public abstract class FileWorker
 		@Override
 		protected void onPreExecute() {
 			dialog = new LoadingDialog();
-			dialog.show(MainActivity.getInstance().getFragmentManager(), "writingDialog");
+			dialog.show(MainActivity.getInstance().getSupportFragmentManager(), "writingDialog");
+			// TODO: show dialog in EditorFragment, dismiss on callback
 		}
 
 		@Override
