@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import androidx.annotation.NonNull;
 
 import java.io.File;
 
@@ -13,6 +14,7 @@ public class OpenDialog extends NavigationDialog {
 
     private Callback callback;
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
@@ -27,7 +29,7 @@ public class OpenDialog extends NavigationDialog {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initView(view, savedInstanceState);
         openDir(currentDir);

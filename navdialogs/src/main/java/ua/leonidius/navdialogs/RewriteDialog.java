@@ -5,6 +5,8 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -12,8 +14,6 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProviders;
 
 public class RewriteDialog extends DialogFragment implements AlertDialog.OnClickListener {
-
-    //private Callback callback;
 
     @Override
     public void onClick(DialogInterface p1, int id) {
@@ -29,6 +29,7 @@ public class RewriteDialog extends DialogFragment implements AlertDialog.OnClick
         }
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
@@ -40,31 +41,29 @@ public class RewriteDialog extends DialogFragment implements AlertDialog.OnClick
     }
 
     private void callback(boolean value) {
-        if (getParentFragment() == null) {
-            Log.d("NavDialogs", "RewriteDialog doesn't have a parent!");
-            return;
-        }
-        RewriteSaveViewModel model;
-        if (getParentFragment().getActivity() != null) { // TODO: maybe create a helper class that has a function for finding fragment's specific viewmodels
-            model = ViewModelProviders.of(getParentFragment().getActivity()).get(RewriteSaveViewModel.class);
-        } else if (getParentFragment().getParentFragment() != null) {
-            model = ViewModelProviders.of(getParentFragment().getParentFragment()).get(RewriteSaveViewModel.class);
+        Model model;
+        if (getParentFragment() != null) { // TODO: maybe create a helper class that has a function for finding fragment's specific viewmodels
+            model = ViewModelProviders.of(getParentFragment()).get(Model.class);
+        } else if (getActivity() != null) {
+            model = ViewModelProviders.of(getActivity()).get(Model.class);
         } else {
-            Log.d("NavDialogs", "SaveDialog doesn't have a parent!");
+            Log.d("NavDialogs", "RewriteDialog doesn't have a parent!");
+            Toast.makeText(getContext(), R.string.error, Toast.LENGTH_SHORT).show();
+            getDialog().dismiss();
             return;
         }
 
         model.setRewrite(value);
     }
 
-    public static class RewriteSaveViewModel extends ViewModel {
+    static class Model extends ViewModel {
         private MutableLiveData<Boolean> rewrite = new MutableLiveData<>();
 
-        public void setRewrite(boolean value) {
+        void setRewrite(boolean value) {
             rewrite.setValue(value);
         }
 
-        public LiveData<Boolean> rewrite() {
+        LiveData<Boolean> rewrite() {
             return rewrite;
         }
 

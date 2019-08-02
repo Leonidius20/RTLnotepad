@@ -2,14 +2,20 @@ package ua.leonidius.navdialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Pair;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProviders;
 
 import java.io.File;
@@ -34,16 +40,17 @@ public class SaveDialog extends NavigationDialog implements AlertDialog.OnClickL
         if (getArguments() != null) {
             currentEncoding = getArguments().getString(BUNDLE_CURRENT_ENCODING, "UTF-8");
         } else currentEncoding = "UTF-8";
-        // TODO: maybe add encoding save via savedInstanceState
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
         adb.setTitle(R.string.save_as);
         adb.setPositiveButton(android.R.string.ok, this);
 
-        View dialogView = getActivity().getLayoutInflater().inflate(R.layout.navdialogs_dialog_save_as, null, false);
+        LayoutInflater inflater = (LayoutInflater)getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View dialogView = inflater.inflate(R.layout.navdialogs_dialog_save_as, null, false);
         initView(dialogView, savedInstanceState);
         adb.setView(dialogView);
 
@@ -99,15 +106,14 @@ public class SaveDialog extends NavigationDialog implements AlertDialog.OnClickL
             return;
         }
 
-        // TODO: debug RewriteDialog not being shown
-        RewriteDialog.RewriteSaveViewModel model;
-        if (getActivity() != null) {
-             model = ViewModelProviders.of(getActivity()).get(RewriteDialog.RewriteSaveViewModel.class);
-        } else if (getParentFragment() != null) {
-            model = ViewModelProviders.of(getParentFragment()).get(RewriteDialog.RewriteSaveViewModel.class);
+        RewriteDialog.Model model;
+        if (getParentFragment() != null) {
+             model = ViewModelProviders.of(getParentFragment()).get(RewriteDialog.Model.class);
+        } else if (getActivity() != null) {
+            model = ViewModelProviders.of(getActivity()).get(RewriteDialog.Model.class);
         } else {
             Log.e("NavDialogs", "SaveDialog doesn't have a parent!");
-            Toast.makeText(getActivity(), android.R.string.no, Toast.LENGTH_SHORT).show(); // TODO: translation
+            Toast.makeText(getContext(), R.string.error, Toast.LENGTH_SHORT).show();
             getDialog().dismiss();
             return;
         }
@@ -119,7 +125,7 @@ public class SaveDialog extends NavigationDialog implements AlertDialog.OnClickL
                 args.putSerializable(BUNDLE_CURRENT_DIR, currentDir);
                 args.putString(BUNDLE_FILE_NAME, nameField.getText().toString());
                 setArguments(args);
-                show(getActivity().getSupportFragmentManager(), "saveDialog");
+                show(getFragmentManager(), "saveDialog");
             }
         });
 
@@ -128,17 +134,32 @@ public class SaveDialog extends NavigationDialog implements AlertDialog.OnClickL
     }
 
     private void callback(File file, String encoding) {
-        SaveDialogViewModel model;
-        if (getActivity() != null) {
-            model = ViewModelProviders.of(getActivity()).get(SaveDialogViewModel.class);
-        } else if (getParentFragment() != null) {
-            model = ViewModelProviders.of(getParentFragment()).get(SaveDialogViewModel.class);
+        Model model;
+        Log.d("NavDialogs", "getActivity() is null: " + (getActivity() == null)
+                + ", getParentFragment() is null: " + (getParentFragment() == null));
+        if (getParentFragment() != null) {
+            model = ViewModelProviders.of(getParentFragment()).get(Model.class);
+        } else if (getActivity() != null) {
+            model = ViewModelProviders.of(getActivity()).get(Model.class);
         } else {
             Log.e("NavDialogs", "SaveDialog doesn't have a parent!");
+            Toast.makeText(getContext(), R.string.error, Toast.LENGTH_SHORT).show();
             getDialog().dismiss();
             return;
         }
         model.setData(file, encoding);
+    }
+
+    public static class Model extends ViewModel {
+        private MutableLiveData<Pair<File, String>> fileData = new MutableLiveData<>();
+
+        public MutableLiveData<Pair<File, String>> getFile() {
+            return fileData;
+        }
+
+        void setData(File file, String encoding) {
+            fileData.setValue(new Pair<>(file, encoding));
+        }
     }
 
 }

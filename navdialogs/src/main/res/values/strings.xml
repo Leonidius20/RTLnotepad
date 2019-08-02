@@ -4,4 +4,5 @@
     <string name="open">Open</string>
     <string name="save_as">Save as…</string>
     <string name="file_overwrite">This file already exists. Overwrite it?</string>
+    <string name="error">Error!</string>
 </resources>

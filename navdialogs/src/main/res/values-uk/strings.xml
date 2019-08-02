@@ -5,4 +5,5 @@
     <string name="open">Відкрити</string>
     <string name="save_as">Зберегти як…</string>
     <string name="file_overwrite">Цей файл вже існує. Перезаписати?</string>
+    <string name="error">Помилка!</string>
 </resources>

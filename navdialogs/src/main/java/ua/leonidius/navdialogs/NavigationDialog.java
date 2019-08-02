@@ -1,12 +1,15 @@
 package ua.leonidius.navdialogs;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 
 import java.io.File;
@@ -18,7 +21,7 @@ abstract class NavigationDialog extends DialogFragment implements OnItemClickLis
 
     private TextView pathView;
     private ListView filesList;
-    protected File currentDir = null;
+    File currentDir = null;
 
     public static final String BUNDLE_CURRENT_DIR = "currentDir";
 
@@ -35,6 +38,7 @@ abstract class NavigationDialog extends DialogFragment implements OnItemClickLis
         if (currentDir == null) currentDir = Environment.getExternalStorageDirectory();
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
@@ -53,7 +57,8 @@ abstract class NavigationDialog extends DialogFragment implements OnItemClickLis
         pathView = dialogView.findViewById(R.id.pathview);
         filesList = dialogView.findViewById(R.id.listview);
         filesList.setOnItemClickListener(this);
-        View header = getActivity().getLayoutInflater().inflate(R.layout.navdialogs_files_list_item, null, false);
+        LayoutInflater inflater = (LayoutInflater)getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View header = inflater.inflate(R.layout.navdialogs_files_list_item, null, false);
         ImageView imageView = header.findViewById(R.id.listitem_icon);
         imageView.setImageResource(R.drawable.up);
         TextView headerText = header.findViewById(R.id.listitem_text);
@@ -79,7 +84,7 @@ abstract class NavigationDialog extends DialogFragment implements OnItemClickLis
     protected void onFileClick(File file) {
     }
 
-    protected void openDir(File directory) {
+    void openDir(File directory) {
         try {
             filesList.setAdapter(AdapterFactory.getFileAdapter(getActivity(), directory));
             currentDir = directory;
@@ -97,7 +102,7 @@ abstract class NavigationDialog extends DialogFragment implements OnItemClickLis
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putSerializable(BUNDLE_CURRENT_DIR, currentDir);
     }

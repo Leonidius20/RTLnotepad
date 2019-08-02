@@ -11,11 +11,12 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 final class ExceptionHandler implements Thread.UncaughtExceptionHandler {
 
-    private final DateFormat formatter = new SimpleDateFormat("dd.MM.yy HH:mm");
-    private final DateFormat fileFormatter = new SimpleDateFormat("dd-MM-yy");
+    private final DateFormat formatter = new SimpleDateFormat("dd.MM.yy HH:mm", Locale.US);
+    private final DateFormat fileFormatter = new SimpleDateFormat("dd-MM-yy", Locale.US);
     private String versionName = "0";
     private int versionCode = 0;
     private final String stacktraceDir;
