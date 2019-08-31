@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProviders;
 import ua.leonidius.navdialogs.SaveDialog;
 import ua.leonidius.rtlnotepad.dialogs.*;
@@ -312,8 +313,9 @@ public class EditorFragment extends Fragment {
      * @param callback Defines what to do with the results of the operation
      */
     private void readFile(@NonNull File file, @NonNull String encoding, @NonNull ReadTask.Callback callback) {
-        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
+            Log.d("RTLnotepad", "No read permission, requesting...");
             // saving data to use in onRequestPermissionsResult()
             fileToRead = file;
             encodingForReading = encoding;
@@ -345,8 +347,9 @@ public class EditorFragment extends Fragment {
      * @param callback Defines what to do after the operation
      */
     private void writeFile(@NonNull File file, @NonNull String text, @NonNull String encoding, @NonNull WriteTask.Callback callback) {
-        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
+            Log.d("RTLnotepad", "No write permission, requesting...");
             // saving data to use in onRequestPermissionsResult()
             fileToWrite = file;
             textToWrite = text;

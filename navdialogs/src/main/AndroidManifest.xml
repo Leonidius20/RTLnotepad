@@ -1,4 +1,1 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="ua.leonidius.navdialogs">
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-</manifest>
+<manifest package="ua.leonidius.navdialogs"/>
