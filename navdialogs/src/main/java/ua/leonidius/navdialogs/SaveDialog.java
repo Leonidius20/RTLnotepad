@@ -12,7 +12,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -99,7 +98,7 @@ public class SaveDialog extends NavigationDialog implements AlertDialog.OnClickL
 
     @Override
     public void onClick(DialogInterface dialog, int id) {
-        File file = new File(getViewModel().currentDir.getPath() + File.pathSeparatorChar + nameField.getText());
+        File file = new File(getViewModel().currentDir.getPath() + File.separatorChar + nameField.getText());
         String encoding = getViewModel().getAvailableEncodings()[encodingSpinner.getSelectedItemPosition()];
 
         if (!file.exists()) {
@@ -107,7 +106,12 @@ public class SaveDialog extends NavigationDialog implements AlertDialog.OnClickL
             return;
         }
 
-        RewriteDialog.Model model;
+        RewriteDialog.create(this, rewrite -> {
+            if (rewrite) getViewModel().callback.call(file, encoding);
+            else show(getFragmentManager(), "saveDialog");
+        }).show(getFragmentManager(), "rewriteDialog");
+
+        /*RewriteDialog.Model model;
         if (getParentFragment() != null) {
              model = ViewModelProviders.of(getParentFragment()).get(RewriteDialog.Model.class);
         } else if (getActivity() != null) {
@@ -126,12 +130,13 @@ public class SaveDialog extends NavigationDialog implements AlertDialog.OnClickL
                 args.putSerializable(BUNDLE_CURRENT_DIR, currentDir);
                 args.putString(BUNDLE_FILE_NAME, nameField.getText().toString());
                 setArguments(args);*/
-                show(getFragmentManager(), "saveDialog");
+                /*show(getFragmentManager(), "saveDialog");
             }
         });
 
         RewriteDialog rewriteDialog = new RewriteDialog();
-        rewriteDialog.show(getFragmentManager(), "rewriteDialog");
+        rewriteDialog.show(getFragmentManager(), "rewriteDialog");*/
+
     }
 
     /*private void callback(File file, String encoding) {
