@@ -1,17 +1,25 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
     defaultConfig {
+        def getVersionName = { ->
+            def stdout = new ByteArrayOutputStream()
+            exec {
+                commandLine  'git', 'describe', '--tags'
+                standardOutput = stdout
+            }
+            return stdout.toString().trim()
+        } as Object
         applicationId "ua.leonidius.rtlnotepad"
         minSdkVersion 17
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 1
-        versionName "devbuild"
+        versionName getVersionName()
     }
     buildTypes {
         release {
@@ -24,6 +32,6 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0-alpha02"
+    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0-beta01"
     implementation project(":navdialogs")
 }

@@ -3,7 +3,6 @@ package ua.leonidius.navdialogs;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -11,6 +10,7 @@ import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.ViewModel;
 
 import java.io.File;
 
@@ -21,21 +21,22 @@ abstract class NavigationDialog extends DialogFragment implements OnItemClickLis
 
     private TextView pathView;
     private ListView filesList;
-    File currentDir = null;
+    //File currentDir = null;
+    NavDialogViewModel viewModel;
 
     public static final String BUNDLE_CURRENT_DIR = "currentDir";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState == null) {
+        /*if (savedInstanceState == null) {
             if (getArguments() != null) {
-                currentDir = (File)getArguments().getSerializable(BUNDLE_CURRENT_DIR);
+                getViewModel().currentDir = (File)getArguments().getSerializable(BUNDLE_CURRENT_DIR);
             }
         } else {
-            currentDir = (File)savedInstanceState.getSerializable(BUNDLE_CURRENT_DIR);
+            getViewModel().currentDir = ((File)savedInstanceState.getSerializable(BUNDLE_CURRENT_DIR));
         }
-        if (currentDir == null) currentDir = Environment.getExternalStorageDirectory();
+        if (getViewModel().currentDir == null) getViewModel().currentDir = (Environment.getExternalStorageDirectory());*/
     }
 
     @NonNull
@@ -74,8 +75,8 @@ abstract class NavigationDialog extends DialogFragment implements OnItemClickLis
         }
         String path;
         String name = ((TextView) item.findViewById(R.id.listitem_text)).getText().toString();
-        if (currentDir.getPath().equals("/")) path = currentDir.getPath() + name;
-        else path = currentDir.getPath() + "/" + name;
+        if (getViewModel().currentDir.getPath().equals("/")) path = getViewModel().currentDir.getPath() + name;
+        else path = getViewModel().currentDir.getPath() + "/" + name;
         File file = new File(path);
         if (file.isDirectory()) openDir(file);
         else onFileClick(file);
@@ -87,8 +88,8 @@ abstract class NavigationDialog extends DialogFragment implements OnItemClickLis
     void openDir(File directory) {
         try {
             filesList.setAdapter(AdapterFactory.getFileAdapter(getActivity(), directory));
-            currentDir = directory;
-            pathView.setText(currentDir.getPath());
+            getViewModel().currentDir = directory;
+            pathView.setText(getViewModel().currentDir.getPath());
         } catch (Exception e) {
             Toast.makeText(getActivity(), R.string.folder_open_error, Toast.LENGTH_SHORT).show();
             e.printStackTrace();
@@ -96,15 +97,26 @@ abstract class NavigationDialog extends DialogFragment implements OnItemClickLis
     }
 
     private void up() {
-        if (currentDir.getPath().equals("/")) return;
-        currentDir = currentDir.getParentFile();
-        openDir(currentDir);
+        if (getViewModel().currentDir.getPath().equals("/")) return;
+        getViewModel().currentDir = getViewModel().currentDir.getParentFile();
+        openDir(getViewModel().currentDir);
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(BUNDLE_CURRENT_DIR, currentDir);
+        //outState.putSerializable(BUNDLE_CURRENT_DIR, currentDir);
+    }
+
+    public abstract NavDialogViewModel getViewModel();
+
+    // SUGGESTION:
+    /*public abstract Class getViewModelClass();
+    public <T> getViewModel() {
+        return ViewModelProviders.of(getActivity()).get(getViewModelClass());
+    }*/
+    abstract static class NavDialogViewModel extends ViewModel {
+        File currentDir;
     }
 
 }

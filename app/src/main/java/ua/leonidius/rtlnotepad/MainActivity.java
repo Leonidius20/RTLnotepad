@@ -2,7 +2,6 @@ package ua.leonidius.rtlnotepad;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
@@ -197,9 +196,7 @@ public class MainActivity extends FragmentActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.options_open:
-                OpenDialog openDialog = new OpenDialog();
-                openDialog.setCallback(this::addTab);
-                openDialog.show(getSupportFragmentManager(), "openDialog");
+                OpenDialog.create(this, this::addTab).show(getSupportFragmentManager(), "openDialog");
                 return true;
             case R.id.options_new:
                 addTab();
@@ -227,11 +224,11 @@ public class MainActivity extends FragmentActivity {
                 setTextSize(SIZE_LARGE);
                 item.setChecked(true);
                 return true;
-            case R.id.options_test:
+            /*case R.id.options_test:
                 Intent i = new Intent();
                 i.setClass(this, TestingActivity.class);
                 startActivity(i);
-                return true;
+                return true;*/
         }
         return super.onOptionsItemSelected(item);
     }

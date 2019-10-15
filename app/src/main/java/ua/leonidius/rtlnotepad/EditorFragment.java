@@ -14,8 +14,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.ViewModelProviders;
 import ua.leonidius.navdialogs.SaveDialog;
 import ua.leonidius.rtlnotepad.dialogs.*;
 import ua.leonidius.rtlnotepad.utils.LastFilesMaster;
@@ -155,7 +153,7 @@ public class EditorFragment extends Fragment {
      * Shows a SaveDialog and writes the text to the selected file.
      */
     private void openSaveDialog() {
-        SaveDialog.Model model = ViewModelProviders.of(this).get(SaveDialog.Model.class);
+        /*SaveDialog.Model model = ViewModelProviders.of(this).get(SaveDialog.Model.class);
         model.getFile().observe(this, data -> {
             Log.d("RTLnotepad", "Data from saveDialog: " + data.first.getPath() + " " + data.second);
             writeFile(data.first, editor.getText().toString(), data.second, success -> {
@@ -176,7 +174,21 @@ public class EditorFragment extends Fragment {
         arguments.putString(SaveDialog.BUNDLE_CURRENT_ENCODING, currentEncoding);
         arguments.putString(SaveDialog.BUNDLE_FILE_NAME, ".txt");
         saveDialog.setArguments(arguments);
-        saveDialog.show(getChildFragmentManager(), "saveDialog");
+        saveDialog.show(getChildFragmentManager(), "saveDialog");*/
+        SaveDialog.create(this, ".txt", "UTF-8", (file, encoding) -> {
+            writeFile(file, editor.getText().toString(), encoding, success -> {
+                if (success) {
+                    this.file = file;
+                    this.currentEncoding = encoding;
+                    setTextChanged(false);
+                    String successMessage = getResources().getString(R.string.file_save_success, file.getName());
+                    Toast.makeText(getContext(), successMessage, Toast.LENGTH_SHORT).show();
+                    LastFilesMaster.add(file);
+                } else {
+                    Toast.makeText(getContext(), R.string.file_save_error, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }).show(getChildFragmentManager(), "saveDialog");
     }
 
     /**
@@ -267,7 +279,7 @@ public class EditorFragment extends Fragment {
                 return;
             }
 
-            SaveDialog.Model model = ViewModelProviders.of(this).get(SaveDialog.Model.class);
+            /*SaveDialog.Model model = ViewModelProviders.of(this).get(SaveDialog.Model.class);
             model.getFile().observe(this, data -> {
                 writeFile(data.first, editor.getText().toString(), data.second, success -> {
                     if (success) {
@@ -284,7 +296,19 @@ public class EditorFragment extends Fragment {
             Bundle arguments = new Bundle();
             arguments.putString(SaveDialog.BUNDLE_CURRENT_ENCODING, currentEncoding);
             arguments.putString(SaveDialog.BUNDLE_FILE_NAME, ".txt");
-            saveDialog.show(getChildFragmentManager(), "saveDialog");
+            saveDialog.show(getChildFragmentManager(), "saveDialog");*/
+            SaveDialog.create(this, ".txt", "UTF-8", (file, encoding) -> {
+                writeFile(file, editor.getText().toString(), encoding, success -> {
+                    if (success) {
+                        String successMessage = getResources().getString(R.string.file_save_success, file.getName());
+                        Toast.makeText(getActivity(), successMessage, Toast.LENGTH_SHORT).show();
+                        LastFilesMaster.add(file);
+                        mActivity.closeTab(selectedTab);
+                    } else {
+                        Toast.makeText(getActivity(), R.string.file_save_error, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }).show(getChildFragmentManager(), "saveDialog");
         });
         ctd.show(mActivity.getFragmentManager(), "closeTabDialog");
     }

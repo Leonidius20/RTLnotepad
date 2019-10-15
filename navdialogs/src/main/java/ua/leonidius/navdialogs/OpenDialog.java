@@ -2,17 +2,50 @@ package ua.leonidius.navdialogs;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.ViewModelProviders;
 
 import java.io.File;
 
 public class OpenDialog extends NavigationDialog {
 
-    private Callback callback;
+    private Model viewModel = null;
+
+    public static OpenDialog create(Fragment frag, Callback callback) {
+        Model model = ViewModelProviders.of(frag).get(Model.class);
+        return create(model, Environment.getExternalStorageDirectory(), callback);
+    }
+
+    public static OpenDialog create(FragmentActivity frag, Callback callback) {
+        Model model = ViewModelProviders.of(frag).get(Model.class);
+        return create(model, Environment.getExternalStorageDirectory(), callback);
+    }
+
+    public static OpenDialog create(Fragment frag, File defaultDir, Callback callback) {
+        Model model = ViewModelProviders.of(frag).get(Model.class);
+        return create(model, defaultDir, callback);
+    }
+
+    public static OpenDialog create(FragmentActivity frag, File defaultDir, Callback callback) {
+        Model model = ViewModelProviders.of(frag).get(Model.class);
+        return create(model, defaultDir, callback);
+    }
+
+    private static OpenDialog create(Model model, File defaultDir, Callback callback) {
+        OpenDialog dialog = new OpenDialog();
+        dialog.viewModel = model;
+        dialog.viewModel.currentDir = defaultDir;
+        dialog.viewModel.callback = callback;
+        return dialog;
+    }
 
     @NonNull
     @Override
@@ -32,7 +65,7 @@ public class OpenDialog extends NavigationDialog {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initView(view, savedInstanceState);
-        openDir(currentDir);
+        openDir(getViewModel().currentDir);
     }
 
     @Override
@@ -49,8 +82,25 @@ public class OpenDialog extends NavigationDialog {
             return;
         }*/
 
-        callback.callback(file);
+        getViewModel().callback.call(file);
         getDialog().dismiss();
+    }
+
+    @Override
+    public Model getViewModel() {
+        if (viewModel == null) {
+            Log.d("NavDialogs (openD)", "getActivity() is null: " + (getActivity() == null)
+                    + ", getParentFragment() is null: " + (getParentFragment() == null));
+            if (getParentFragment() != null) {
+                viewModel = ViewModelProviders.of(getParentFragment()).get(Model.class);
+            } else if (getActivity() != null) {
+                viewModel = ViewModelProviders.of(getActivity()).get(Model.class);
+            } else {
+                Log.e("NavDialogs", "SaveDialog doesn't have a parent!");
+                //Toast.makeText(getContext(), R.string.error, Toast.LENGTH_SHORT).show();
+            }
+        }
+        return viewModel;
     }
 
     /*private boolean isText(File file) {
@@ -61,12 +111,12 @@ public class OpenDialog extends NavigationDialog {
         }
     }*/
 
-    public void setCallback(Callback callback) {
-        this.callback = callback;
+    public interface Callback {
+        void call(File file);
     }
 
-    public interface Callback {
-        void callback(File file);
+    public static class Model extends NavDialogViewModel {
+        Callback callback;
     }
 
 }
