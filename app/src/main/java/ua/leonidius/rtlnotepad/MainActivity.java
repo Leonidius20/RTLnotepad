@@ -1,14 +1,15 @@
 package ua.leonidius.rtlnotepad;
 
 import android.app.ActionBar;
-import android.app.FragmentTransaction;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentTransaction;
 import ua.leonidius.navdialogs.OpenDialog;
 import ua.leonidius.rtlnotepad.dialogs.ExitDialog;
 import ua.leonidius.rtlnotepad.dialogs.LastFilesDialog;
@@ -18,7 +19,7 @@ import java.io.File;
 import java.util.LinkedHashMap;
 
 public class MainActivity extends FragmentActivity {
-    private NoEditorFragment noEditorFragment;
+    //private PlaceholderFragment placeholderFragment;
     public SharedPreferences pref;
 
     final int SIZE_SMALL = 14, SIZE_MEDIUM = 18, SIZE_LARGE = 22;
@@ -31,9 +32,7 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //super.onCreate(null); // I'll manage to restore data on my own, thanks
         super.onCreate(savedInstanceState);
-        // TODO: figure out a better way to restore data, cause passing null results im dialogFragments not being restored
         activity = this;
         pref = getPreferences(MODE_PRIVATE);
 
@@ -49,19 +48,16 @@ public class MainActivity extends FragmentActivity {
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         actionBar.setDisplayShowTitleEnabled(false);
 
-        // Restoring tabs
-        // TODO I temporarily commented this
-		/*if (savedInstanceState != null) {
-			restoreTabs(savedInstanceState);
-		}*/
-
-        // RESTORING TABS
-        if (savedInstanceState != null) {
+        if (savedInstanceState == null) { // Cold start
+            addPlaceholderFragmentIfNeeded();
+            // Opening a file from intent
+            if (getIntent().getData() != null) {
+                String path = getIntent().getData().getSchemeSpecificPart();
+                if (path != null) addTab(new File(path));
+            }
+        } else { // Restoring tabs after activity recreation
             LinkedHashMap<String, ActionBar.Tab> tabs = (LinkedHashMap<String, ActionBar.Tab>) getLastCustomNonConfigurationInstance();
-
-            if (tabs.size() == 0) {
-                noEditorFragment = (NoEditorFragment) getFragmentManager().findFragmentByTag(NoEditorFragment.TAG);
-            } else {
+            if (tabs.size() != 0) {
                 int selectedTabIndex = savedInstanceState.getInt(BUNDLE_SELECTED_TAB_INDEX, -1);
                 for (String fragmentTag : tabs.keySet()) {
                     ActionBar.Tab tab = tabs.get(fragmentTag);
@@ -69,18 +65,22 @@ public class MainActivity extends FragmentActivity {
                     // we don't change the fragment held in 'tag', because it is not destroyed
                     getActionBar().addTab(tab);
                     if (tab.getPosition() == selectedTabIndex) getActionBar().selectTab(tab);
-                    // they reset fragment tags on recreate
+                    // they reset fragment tags on recreate?
                 }
             }
-        } else addNoEditorFragmentIfNeeded(); // If app is cold starting
+        }
+
+        // Restoring tabs
+        if (savedInstanceState != null) {
+
+        } else addPlaceholderFragmentIfNeeded(); // If app is cold starting
 
         // Opening a file from intent
-        // TODO check if activity was launched with the file or not
-        String path;
-        try {
-            path = getIntent().getData().getSchemeSpecificPart();
-            if (path != null) addTab(new File(path));
-        } catch (Exception e) {
+        if (savedInstanceState == null) {
+            if (getIntent().getData() != null) {
+                String path = getIntent().getData().getSchemeSpecificPart();
+                if (path != null) addTab(new File(path));
+            }
         }
 
         LastFilesMaster.initSlots(this);
@@ -102,8 +102,7 @@ public class MainActivity extends FragmentActivity {
      * @param file File to open
      */
     private void addTab(File file) {
-        // Detaching noEditorFragment
-        removeNoEditorFragmentIfNeeded();
+        removePlaceholderFragmentIfNeeded();
 
         // If the file is already opened, switching to the file's tab
         // TODO: INSTEAD OF SWITCHING, PROMPT USER TO CHOOSE IF HE WANTS TO ADD A ANOTHER TAB WITH THAT FILE
@@ -139,7 +138,7 @@ public class MainActivity extends FragmentActivity {
      */
     private void addTab() {
         // Detaching noEditorFragment
-        removeNoEditorFragmentIfNeeded();
+        removePlaceholderFragmentIfNeeded();
 
         ActionBar actionBar = getActionBar();
         ActionBar.Tab tab = actionBar.newTab();
@@ -164,7 +163,7 @@ public class MainActivity extends FragmentActivity {
      */
     public void closeTab(ActionBar.Tab tab) {
         getActionBar().removeTab(tab);
-        addNoEditorFragmentIfNeeded();
+        addPlaceholderFragmentIfNeeded();
     }
 
     @Override
@@ -196,7 +195,7 @@ public class MainActivity extends FragmentActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.options_open:
-                OpenDialog.create(this, this::addTab).show(getSupportFragmentManager(), "openDialog");
+                OpenDialog.create(this::addTab).show(getSupportFragmentManager(), "openDialog");
                 return true;
             case R.id.options_new:
                 addTab();
@@ -265,27 +264,34 @@ public class MainActivity extends FragmentActivity {
     }
 
     /**
-     * Attaches a NoEditorFragment (placeholder) if all the tabs are closed.
+     * Attaches a PlaceholderFragment if all the tabs are closed.
      */
-    // TODO: not to hold the fragment in memory?
-    private void addNoEditorFragmentIfNeeded() {
+    private void addPlaceholderFragmentIfNeeded() {
         if (getActionBar().getTabCount() == 0) {
-            FragmentTransaction sft = getFragmentManager().beginTransaction();
-            if (noEditorFragment == null) noEditorFragment = new NoEditorFragment();
-            if (!noEditorFragment.isAdded()) sft.add(android.R.id.content, noEditorFragment, NoEditorFragment.TAG);
-            sft.attach(noEditorFragment);
+            Fragment placeholder = getSupportFragmentManager().findFragmentByTag(PlaceholderFragment.TAG);
+            if (placeholder == null) {
+                placeholder = new PlaceholderFragment();
+                //placeholder.setRetainInstance(true);
+            }
+
+            FragmentTransaction sft = getSupportFragmentManager().beginTransaction();
+            if (!placeholder.isAdded()) sft.add(android.R.id.content, placeholder, PlaceholderFragment.TAG);
+            sft.attach(placeholder);
             sft.commitAllowingStateLoss();
         }
     }
 
     /**
-     * Removes a NoEditorFragment (placeholder) if a tab is being opened.
+     * Removes a PlaceholderFragment if a tab is being opened.
      */
-    private void removeNoEditorFragmentIfNeeded() {
+    private void removePlaceholderFragmentIfNeeded() {
         if (getActionBar().getTabCount() == 0) {
-            FragmentTransaction sft = getFragmentManager().beginTransaction();
-            sft.detach(noEditorFragment);
-            sft.commit();
+            Fragment placeholder = getSupportFragmentManager().findFragmentByTag(PlaceholderFragment.TAG);
+            if (placeholder != null && !placeholder.isDetached()) {
+                FragmentTransaction sft = getSupportFragmentManager().beginTransaction();
+                sft.detach(placeholder);
+                sft.commitAllowingStateLoss();
+            }
         }
     }
 

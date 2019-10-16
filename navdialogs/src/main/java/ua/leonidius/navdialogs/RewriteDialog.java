@@ -2,33 +2,22 @@ package ua.leonidius.navdialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 
 public class RewriteDialog extends DialogFragment implements AlertDialog.OnClickListener {
 
     private Model viewModel = null;
+    private Initializer initializer = new Initializer();
 
-    public static RewriteDialog create(Fragment frag, Callback callback) {
-        return create(ViewModelProviders.of(frag).get(Model.class), callback);
-    }
-
-    public static RewriteDialog create(FragmentActivity frag, Callback callback) {
-        return create(ViewModelProviders.of(frag).get(Model.class), callback);
-    }
-
-    private static RewriteDialog create(Model model, Callback callback) {
+    public static RewriteDialog create(Callback callback) {
         RewriteDialog dialog = new RewriteDialog();
-        dialog.viewModel = model;
-        dialog.viewModel.callback = callback;
+        dialog.initializer.callback = callback;
         return dialog;
     }
 
@@ -41,6 +30,15 @@ public class RewriteDialog extends DialogFragment implements AlertDialog.OnClick
             case Dialog.BUTTON_POSITIVE:
                 getViewModel().callback.call(true);
                 break;
+        }
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (!getViewModel().initialized) {
+            initializer.initialize();
+            getViewModel().initialized = true;
         }
     }
 
@@ -57,13 +55,7 @@ public class RewriteDialog extends DialogFragment implements AlertDialog.OnClick
 
     private Model getViewModel() {
         if (viewModel == null) {
-            if (getParentFragment() != null) { // TODO: maybe create a helper class that has a function for finding fragment's specific viewmodels
-                viewModel = ViewModelProviders.of(getParentFragment()).get(Model.class);
-            } else if (getActivity() != null) {
-                viewModel = new ViewModelProvider(getActivity()).get(Model.class);
-            } else {
-                Log.d("NavDialogs", "RewriteDialog doesn't have a parent!");
-            }
+            viewModel = new ViewModelProvider(this).get(Model.class);
         }
         return viewModel;
     }
@@ -73,7 +65,16 @@ public class RewriteDialog extends DialogFragment implements AlertDialog.OnClick
     }
 
     public static class Model extends ViewModel {
+        boolean initialized = false;
         Callback callback;
+    }
+
+    public class Initializer {
+        Callback callback;
+
+        void initialize() {
+            getViewModel().callback = callback;
+        }
     }
 
 }

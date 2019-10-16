@@ -1,10 +1,10 @@
 package ua.leonidius.rtlnotepad;
 
-import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import androidx.fragment.app.Fragment;
 
 /**
  * This fragment is being showed when there is no editor tabs opened.
@@ -13,7 +13,7 @@ import android.view.ViewGroup;
  * Project: RTLnotepad
  **/
 
-public class NoEditorFragment extends Fragment {
+public class PlaceholderFragment extends Fragment {
 
     final static String TAG = "noEditorFragment";
 

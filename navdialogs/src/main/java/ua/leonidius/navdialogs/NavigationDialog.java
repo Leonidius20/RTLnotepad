@@ -21,23 +21,6 @@ abstract class NavigationDialog extends DialogFragment implements OnItemClickLis
 
     private TextView pathView;
     private ListView filesList;
-    //File currentDir = null;
-    NavDialogViewModel viewModel;
-
-    public static final String BUNDLE_CURRENT_DIR = "currentDir";
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        /*if (savedInstanceState == null) {
-            if (getArguments() != null) {
-                getViewModel().currentDir = (File)getArguments().getSerializable(BUNDLE_CURRENT_DIR);
-            }
-        } else {
-            getViewModel().currentDir = ((File)savedInstanceState.getSerializable(BUNDLE_CURRENT_DIR));
-        }
-        if (getViewModel().currentDir == null) getViewModel().currentDir = (Environment.getExternalStorageDirectory());*/
-    }
 
     @NonNull
     @Override
@@ -82,8 +65,7 @@ abstract class NavigationDialog extends DialogFragment implements OnItemClickLis
         else onFileClick(file);
     }
 
-    protected void onFileClick(File file) {
-    }
+    protected void onFileClick(File file) {}
 
     void openDir(File directory) {
         try {
@@ -105,16 +87,10 @@ abstract class NavigationDialog extends DialogFragment implements OnItemClickLis
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        //outState.putSerializable(BUNDLE_CURRENT_DIR, currentDir);
     }
 
     public abstract NavDialogViewModel getViewModel();
 
-    // SUGGESTION:
-    /*public abstract Class getViewModelClass();
-    public <T> getViewModel() {
-        return ViewModelProviders.of(getActivity()).get(getViewModelClass());
-    }*/
     abstract static class NavDialogViewModel extends ViewModel {
         File currentDir;
     }

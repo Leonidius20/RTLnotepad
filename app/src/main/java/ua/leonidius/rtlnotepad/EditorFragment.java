@@ -153,29 +153,7 @@ public class EditorFragment extends Fragment {
      * Shows a SaveDialog and writes the text to the selected file.
      */
     private void openSaveDialog() {
-        /*SaveDialog.Model model = ViewModelProviders.of(this).get(SaveDialog.Model.class);
-        model.getFile().observe(this, data -> {
-            Log.d("RTLnotepad", "Data from saveDialog: " + data.first.getPath() + " " + data.second);
-            writeFile(data.first, editor.getText().toString(), data.second, success -> {
-                if (success) {
-                    file = data.first;
-                    currentEncoding = data.second;
-                    setTextChanged(false);
-                    String successMessage = getResources().getString(R.string.file_save_success, data.first.getName());
-                    Toast.makeText(getContext(), successMessage, Toast.LENGTH_SHORT).show();
-                    LastFilesMaster.add(data.first);
-                } else {
-                    Toast.makeText(getContext(), R.string.file_save_error, Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
-        SaveDialog saveDialog = new SaveDialog();
-        Bundle arguments = new Bundle();
-        arguments.putString(SaveDialog.BUNDLE_CURRENT_ENCODING, currentEncoding);
-        arguments.putString(SaveDialog.BUNDLE_FILE_NAME, ".txt");
-        saveDialog.setArguments(arguments);
-        saveDialog.show(getChildFragmentManager(), "saveDialog");*/
-        SaveDialog.create(this, ".txt", "UTF-8", (file, encoding) -> {
+        SaveDialog.create(".txt", "UTF-8", (file, encoding) -> {
             writeFile(file, editor.getText().toString(), encoding, success -> {
                 if (success) {
                     this.file = file;
@@ -297,7 +275,7 @@ public class EditorFragment extends Fragment {
             arguments.putString(SaveDialog.BUNDLE_CURRENT_ENCODING, currentEncoding);
             arguments.putString(SaveDialog.BUNDLE_FILE_NAME, ".txt");
             saveDialog.show(getChildFragmentManager(), "saveDialog");*/
-            SaveDialog.create(this, ".txt", "UTF-8", (file, encoding) -> {
+            SaveDialog.create(".txt", "UTF-8", (file, encoding) -> {
                 writeFile(file, editor.getText().toString(), encoding, success -> {
                     if (success) {
                         String successMessage = getResources().getString(R.string.file_save_success, file.getName());
