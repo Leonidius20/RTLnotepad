@@ -1,32 +1,29 @@
-package ua.leonidius.rtlnotepad.dialogs;
+package ua.leonidius.rtlnotepad.dialogs
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.content.DialogInterface;
-import android.os.Bundle;
-import ua.leonidius.rtlnotepad.MainActivity;
-import ua.leonidius.rtlnotepad.R;
+import android.app.AlertDialog
+import android.app.Dialog
+import android.content.DialogInterface
+import android.os.Bundle
+import androidx.fragment.app.DialogFragment
+import ua.leonidius.rtlnotepad.MainActivity
+import ua.leonidius.rtlnotepad.R
 
-public class ExitDialog extends DialogFragment implements AlertDialog.OnClickListener
-{
+class ExitDialog : DialogFragment(), DialogInterface.OnClickListener {
 
-	@Override
-	public void onClick(DialogInterface p1, int id)
-	{
-		if (id == Dialog.BUTTON_POSITIVE) MainActivity.getInstance().finish();
-	}
+    // TODO("Rewrite with callback")
 
-	@Override
-	public Dialog onCreateDialog(Bundle savedInstanceState)
-	{
-		AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.getInstance());
-		adb.setCancelable(false);
-		adb.setTitle(R.string.exit);
-		adb.setMessage(R.string.unsaved_files);
-		adb.setPositiveButton(R.string.yes, this);
-		adb.setNegativeButton(R.string.no, this);
-		return adb.create();
-	}
-	
+    override fun onClick(p1: DialogInterface, id: Int) {
+        if (id == Dialog.BUTTON_POSITIVE) MainActivity.instance.finish()
+    }
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val adb = AlertDialog.Builder(MainActivity.instance)
+        adb.setCancelable(false)
+        adb.setTitle(R.string.exit)
+        adb.setMessage(R.string.unsaved_files)
+        adb.setPositiveButton(R.string.yes, this)
+        adb.setNegativeButton(R.string.no, this)
+        return adb.create()
+    }
+
 }

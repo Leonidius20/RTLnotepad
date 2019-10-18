@@ -1,99 +1,74 @@
-package ua.leonidius.rtlnotepad;
+package ua.leonidius.rtlnotepad
 
-import android.app.ActionBar;
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.LinearLayout;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentTransaction;
-import ua.leonidius.navdialogs.OpenDialog;
-import ua.leonidius.rtlnotepad.dialogs.ExitDialog;
-import ua.leonidius.rtlnotepad.dialogs.LastFilesDialog;
-import ua.leonidius.rtlnotepad.utils.LastFilesMaster;
+import android.app.ActionBar
+import android.content.Context
+import android.content.SharedPreferences
+import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.LinearLayout
+import androidx.fragment.app.FragmentActivity
+import ua.leonidius.navdialogs.OpenDialog
+import ua.leonidius.rtlnotepad.dialogs.ExitDialog
+import ua.leonidius.rtlnotepad.dialogs.LastFilesDialog
+import ua.leonidius.rtlnotepad.utils.LastFilesMaster
+import java.io.File
+import java.util.*
 
-import java.io.File;
-import java.util.LinkedHashMap;
-
-public class MainActivity extends FragmentActivity {
+class MainActivity : FragmentActivity() {
     //private PlaceholderFragment placeholderFragment;
-    public SharedPreferences pref;
+    lateinit var pref: SharedPreferences
 
-    final int SIZE_SMALL = 14, SIZE_MEDIUM = 18, SIZE_LARGE = 22;
-    final String PREF_TEXT_SIZE = "textSize";
-    private final String PREF_THEME = "theme", PREF_THEME_LIGHT = "light", PREF_THEME_DARK = "dark";
+    internal val SIZE_SMALL = 14
+    internal val SIZE_MEDIUM = 18
+    internal val SIZE_LARGE = 22
+    internal val PREF_TEXT_SIZE = "textSize"
+    private val PREF_THEME = "theme"
+    private val PREF_THEME_LIGHT = "light"
+    private val PREF_THEME_DARK = "dark"
 
-    private final String BUNDLE_SELECTED_TAB_INDEX = "selectedTabIndex";
+    private val BUNDLE_SELECTED_TAB_INDEX = "selectedTabIndex"
 
-    public static MainActivity activity;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        activity = this;
-        pref = getPreferences(MODE_PRIVATE);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        instance = this
+        pref = getPreferences(Context.MODE_PRIVATE)
 
         // Applying dark theme if chosen
-        if (pref.getString(PREF_THEME, PREF_THEME_LIGHT).equals(PREF_THEME_DARK)) {
-            setTheme(R.style.Leonidius_Dark);
+        if (pref.getString(PREF_THEME, PREF_THEME_LIGHT) == PREF_THEME_DARK) {
+            setTheme(R.style.Leonidius_Dark)
         }
 
-        setContentView(new LinearLayout(this));
+        setContentView(LinearLayout(this))
 
         // Setting up tab navigation
-        ActionBar actionBar = getActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-        actionBar.setDisplayShowTitleEnabled(false);
+        val actionBar = actionBar
+        actionBar!!.navigationMode = ActionBar.NAVIGATION_MODE_TABS
+        actionBar.setDisplayShowTitleEnabled(false)
 
         if (savedInstanceState == null) { // Cold start
-            addPlaceholderFragmentIfNeeded();
+            addPlaceholderFragmentIfNeeded()
             // Opening a file from intent
-            if (getIntent().getData() != null) {
-                String path = getIntent().getData().getSchemeSpecificPart();
-                if (path != null) addTab(new File(path));
+            if (intent.data != null) {
+                val path = intent.data!!.schemeSpecificPart
+                if (path != null) addTab(File(path))
             }
         } else { // Restoring tabs after activity recreation
-            LinkedHashMap<String, ActionBar.Tab> tabs = (LinkedHashMap<String, ActionBar.Tab>) getLastCustomNonConfigurationInstance();
-            if (tabs.size() != 0) {
-                int selectedTabIndex = savedInstanceState.getInt(BUNDLE_SELECTED_TAB_INDEX, -1);
-                for (String fragmentTag : tabs.keySet()) {
-                    ActionBar.Tab tab = tabs.get(fragmentTag);
+            val tabs = lastCustomNonConfigurationInstance as LinkedHashMap<String, ActionBar.Tab>?
+            if (tabs!!.size != 0) {
+                val selectedTabIndex = savedInstanceState.getInt(BUNDLE_SELECTED_TAB_INDEX, -1)
+                for (fragmentTag in tabs.keys) {
+                    val tab = tabs[fragmentTag]
                     //tab.setTag(getFragmentManager().findFragmentByTag(fragmentTag));
                     // we don't change the fragment held in 'tag', because it is not destroyed
-                    getActionBar().addTab(tab);
-                    if (tab.getPosition() == selectedTabIndex) getActionBar().selectTab(tab);
+                    getActionBar()!!.addTab(tab)
+                    if (tab!!.position == selectedTabIndex) getActionBar()!!.selectTab(tab)
                     // they reset fragment tags on recreate?
                 }
             }
         }
 
-        // Restoring tabs
-        if (savedInstanceState != null) {
-
-        } else addPlaceholderFragmentIfNeeded(); // If app is cold starting
-
-        // Opening a file from intent
-        if (savedInstanceState == null) {
-            if (getIntent().getData() != null) {
-                String path = getIntent().getData().getSchemeSpecificPart();
-                if (path != null) addTab(new File(path));
-            }
-        }
-
-        LastFilesMaster.initSlots(this);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-		/*removeNoEditorFragmentIfNeeded();
-		HashSet<ActionBar.Tab> tabs = (HashSet<ActionBar.Tab>)getLastNonConfigurationInstance();
-		for (ActionBar.Tab tab : tabs) {
-			getActionBar().addTab(tab);
-		}*/
+        LastFilesMaster.initSlots(this)
     }
 
     /**
@@ -101,58 +76,58 @@ public class MainActivity extends FragmentActivity {
      *
      * @param file File to open
      */
-    private void addTab(File file) {
-        removePlaceholderFragmentIfNeeded();
+    private fun addTab(file: File) {
+        removePlaceholderFragmentIfNeeded()
 
         // If the file is already opened, switching to the file's tab
         // TODO: INSTEAD OF SWITCHING, PROMPT USER TO CHOOSE IF HE WANTS TO ADD A ANOTHER TAB WITH THAT FILE
-        ActionBar.Tab fileTab = getFileTab(file);
+        val fileTab = getFileTab(file)
         if (fileTab != null) {
-            getActionBar().selectTab(fileTab);
-            return;
+            actionBar!!.selectTab(fileTab)
+            return
         }
 
         // Creating a new tab
-        ActionBar actionBar = getActionBar();
-        ActionBar.Tab tab = actionBar.newTab();
-        tab.setText(file.getName());
+        val actionBar = actionBar
+        val tab = actionBar!!.newTab()
+        tab.text = file.name
 
-        EditorFragment fragment = new EditorFragment();
-        Bundle arguments = new Bundle();
-        arguments.putString(EditorFragment.ARGUMENT_FILE_PATH, file.getPath());
-        fragment.setArguments(arguments);
-        fragment.setRetainInstance(true);
-        tab.setTag(fragment); // Adding fragment as a tag
+        val fragment = EditorFragment()
+        val arguments = Bundle()
+        arguments.putString(EditorFragment.ARGUMENT_FILE_PATH, file.path)
+        fragment.arguments = arguments
+        fragment.retainInstance = true
+        tab.tag = fragment // Adding fragment as a tag
 
-        tab.setTabListener(new EditorTabListener());
-        actionBar.addTab(tab);
+        tab.setTabListener(EditorTabListener())
+        actionBar.addTab(tab)
 
         // Selecting the tab
-        actionBar.selectTab(tab);
+        actionBar.selectTab(tab)
 
-        LastFilesMaster.add(file);
+        LastFilesMaster.add(file)
     }
 
     /**
      * Adds a tab with a blank editor for a new file
      */
-    private void addTab() {
+    private fun addTab() {
         // Detaching noEditorFragment
-        removePlaceholderFragmentIfNeeded();
+        removePlaceholderFragmentIfNeeded()
 
-        ActionBar actionBar = getActionBar();
-        ActionBar.Tab tab = actionBar.newTab();
-        tab.setText(R.string.new_document);
+        val actionBar = actionBar
+        val tab = actionBar!!.newTab()
+        tab.setText(R.string.new_document)
 
-        EditorFragment fragment = new EditorFragment();
-        fragment.setRetainInstance(true);
-        tab.setTag(fragment); // Adding fragment as a tag
+        val fragment = EditorFragment()
+        fragment.retainInstance = true
+        tab.tag = fragment // Adding fragment as a tag
 
-        tab.setTabListener(new EditorTabListener());
-        actionBar.addTab(tab);
+        tab.setTabListener(EditorTabListener())
+        actionBar.addTab(tab)
 
         // Selecting the tab
-        actionBar.selectTab(tab);
+        actionBar.selectTab(tab)
     }
 
     /**
@@ -161,88 +136,83 @@ public class MainActivity extends FragmentActivity {
      *
      * @param tab Tab to close
      */
-    public void closeTab(ActionBar.Tab tab) {
-        getActionBar().removeTab(tab);
-        addPlaceholderFragmentIfNeeded();
+    fun closeTab(tab: ActionBar.Tab) {
+        actionBar!!.removeTab(tab)
+        addPlaceholderFragmentIfNeeded()
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.options_new, menu);
-        switch (pref.getString(PREF_THEME, PREF_THEME_LIGHT)) {
-            case PREF_THEME_LIGHT:
-                menu.findItem(R.id.options_theme_light).setChecked(true);
-                break;
-            case PREF_THEME_DARK:
-                menu.findItem(R.id.options_theme_dark).setChecked(true);
-                break;
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.options_new, menu)
+        when (pref.getString(PREF_THEME, PREF_THEME_LIGHT)) {
+            PREF_THEME_LIGHT -> menu.findItem(R.id.options_theme_light).isChecked = true
+            PREF_THEME_DARK -> menu.findItem(R.id.options_theme_dark).isChecked = true
         }
-        switch (pref.getInt(PREF_TEXT_SIZE, SIZE_MEDIUM)) {
-            case SIZE_SMALL:
-                menu.findItem(R.id.options_textSize_small).setChecked(true);
-                break;
-            case SIZE_MEDIUM:
-                menu.findItem(R.id.options_textSize_medium).setChecked(true);
-                break;
-            case SIZE_LARGE:
-                menu.findItem(R.id.options_textSize_large).setChecked(true);
-                break;
+        when (pref.getInt(PREF_TEXT_SIZE, SIZE_MEDIUM)) {
+            SIZE_SMALL -> menu.findItem(R.id.options_textSize_small).isChecked = true
+            SIZE_MEDIUM -> menu.findItem(R.id.options_textSize_medium).isChecked = true
+            SIZE_LARGE -> menu.findItem(R.id.options_textSize_large).isChecked = true
         }
-        return super.onCreateOptionsMenu(menu);
+        return super.onCreateOptionsMenu(menu)
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.options_open:
-                OpenDialog.create(this::addTab).show(getSupportFragmentManager(), "openDialog");
-                return true;
-            case R.id.options_new:
-                addTab();
-                return true;
-            case R.id.options_theme_light:
-                setThemeNow(PREF_THEME_LIGHT, item);
-                return true;
-            case R.id.options_theme_dark:
-                setThemeNow(PREF_THEME_DARK, item);
-                return true;
-            case R.id.options_last_files:
-                LastFilesDialog lfd = new LastFilesDialog();
-                lfd.setCallback(path -> addTab(new File(path)));
-                lfd.show(getFragmentManager(), "lastFilesDialog");
-                return true;
-            case R.id.options_textSize_small:
-                setTextSize(SIZE_SMALL);
-                item.setChecked(true);
-                return true;
-            case R.id.options_textSize_medium:
-                setTextSize(SIZE_MEDIUM);
-                item.setChecked(true);
-                return true;
-            case R.id.options_textSize_large:
-                setTextSize(SIZE_LARGE);
-                item.setChecked(true);
-                return true;
-            /*case R.id.options_test:
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.options_open -> {
+                OpenDialog.create { file : File -> addTab(file) }.show(supportFragmentManager, "openDialog")
+                return true
+            }
+            R.id.options_new -> {
+                addTab()
+                return true
+            }
+            R.id.options_theme_light -> {
+                setThemeNow(PREF_THEME_LIGHT, item)
+                return true
+            }
+            R.id.options_theme_dark -> {
+                setThemeNow(PREF_THEME_DARK, item)
+                return true
+            }
+            R.id.options_last_files -> {
+                // TODO("Replace with concise syntax")
+                val lfd = LastFilesDialog()
+                lfd.setCallback { path -> addTab(File(path)) }
+                lfd.show(supportFragmentManager, "lastFilesDialog")
+                return true
+            }
+            R.id.options_textSize_small -> {
+                setTextSize(SIZE_SMALL)
+                item.isChecked = true
+                return true
+            }
+            R.id.options_textSize_medium -> {
+                setTextSize(SIZE_MEDIUM)
+                item.isChecked = true
+                return true
+            }
+            R.id.options_textSize_large -> {
+                setTextSize(SIZE_LARGE)
+                item.isChecked = true
+                return true
+            }
+        }/*case R.id.options_test:
                 Intent i = new Intent();
                 i.setClass(this, TestingActivity.class);
                 startActivity(i);
                 return true;*/
-        }
-        return super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item)
     }
 
-    @Override
-    public void onBackPressed() {
-        for (int i = 0; i < getActionBar().getTabCount(); i++) {
-            ActionBar.Tab tab = getActionBar().getTabAt(i);
-            EditorFragment tabFragment = (EditorFragment) tab.getTag();
+    override fun onBackPressed() {
+        for (i in 0 until actionBar!!.tabCount) {
+            val tab = actionBar!!.getTabAt(i)
+            val tabFragment = tab.tag as EditorFragment
             if (tabFragment.hasUnsavedChanges) {
-                new ExitDialog().show(getFragmentManager(), "exitDialog");
-                return;
+                ExitDialog().show(supportFragmentManager, "exitDialog")
+                return
             }
         }
-        super.onBackPressed();
+        super.onBackPressed()
     }
 
     /**
@@ -251,46 +221,46 @@ public class MainActivity extends FragmentActivity {
      * @param file File which is opened in the tab we are looking for
      * @return ActionBar.Tab in which the specified file is opened, if such a tab exists, null otherwise
      */
-    private ActionBar.Tab getFileTab(File file) {
+    private fun getFileTab(file: File): ActionBar.Tab? {
         // Iterating over tabs
-        for (int i = 0; i < getActionBar().getTabCount(); i++) {
-            ActionBar.Tab tab = getActionBar().getTabAt(i);
-            EditorFragment tabFragment = (EditorFragment) tab.getTag();
-            if (tabFragment.file != null && tabFragment.file.equals(file)) {
-                return tab;
+        for (i in 0 until actionBar!!.tabCount) {
+            val tab = actionBar!!.getTabAt(i)
+            val tabFragment = tab.tag as EditorFragment
+            if (tabFragment.file != null && tabFragment.file == file) {
+                return tab
             }
         }
-        return null;
+        return null
     }
 
     /**
      * Attaches a PlaceholderFragment if all the tabs are closed.
      */
-    private void addPlaceholderFragmentIfNeeded() {
-        if (getActionBar().getTabCount() == 0) {
-            Fragment placeholder = getSupportFragmentManager().findFragmentByTag(PlaceholderFragment.TAG);
+    private fun addPlaceholderFragmentIfNeeded() {
+        if (actionBar!!.tabCount == 0) {
+            var placeholder = supportFragmentManager.findFragmentByTag(PlaceholderFragment.TAG)
             if (placeholder == null) {
-                placeholder = new PlaceholderFragment();
+                placeholder = PlaceholderFragment()
                 //placeholder.setRetainInstance(true);
             }
 
-            FragmentTransaction sft = getSupportFragmentManager().beginTransaction();
-            if (!placeholder.isAdded()) sft.add(android.R.id.content, placeholder, PlaceholderFragment.TAG);
-            sft.attach(placeholder);
-            sft.commitAllowingStateLoss();
+            val sft = supportFragmentManager.beginTransaction()
+            if (!placeholder.isAdded) sft.add(android.R.id.content, placeholder, PlaceholderFragment.TAG)
+            sft.attach(placeholder)
+            sft.commitAllowingStateLoss()
         }
     }
 
     /**
      * Removes a PlaceholderFragment if a tab is being opened.
      */
-    private void removePlaceholderFragmentIfNeeded() {
-        if (getActionBar().getTabCount() == 0) {
-            Fragment placeholder = getSupportFragmentManager().findFragmentByTag(PlaceholderFragment.TAG);
-            if (placeholder != null && !placeholder.isDetached()) {
-                FragmentTransaction sft = getSupportFragmentManager().beginTransaction();
-                sft.detach(placeholder);
-                sft.commitAllowingStateLoss();
+    private fun removePlaceholderFragmentIfNeeded() {
+        if (actionBar!!.tabCount == 0) {
+            val placeholder = supportFragmentManager.findFragmentByTag(PlaceholderFragment.TAG)
+            if (placeholder != null && !placeholder.isDetached) {
+                val sft = supportFragmentManager.beginTransaction()
+                sft.detach(placeholder)
+                sft.commitAllowingStateLoss()
             }
         }
     }
@@ -302,32 +272,24 @@ public class MainActivity extends FragmentActivity {
      * @param theme A string that says which theme to apply. Must be one of the constants defined in MainActivity
      * @param item  An item of the menu which corresponds to a theme.
      */
-    private void setThemeNow(String theme, MenuItem item) {
-        if (!item.isChecked()) {
-            item.setChecked(true);
-            SharedPreferences.Editor prefEdit = pref.edit();
-            prefEdit.putString(PREF_THEME, theme);
-            prefEdit.apply();
-            recreate();
+    private fun setThemeNow(theme: String, item: MenuItem) {
+        if (!item.isChecked) {
+            item.isChecked = true
+            val prefEdit = pref.edit()
+            prefEdit.putString(PREF_THEME, theme)
+            prefEdit.apply()
+            recreate()
         }
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
 
-        if (getActionBar().getTabCount() > 0) {
-            outState.putInt(BUNDLE_SELECTED_TAB_INDEX, getActionBar().getSelectedTab().getPosition());
+        if (actionBar!!.tabCount > 0) {
+            outState.putInt(BUNDLE_SELECTED_TAB_INDEX, actionBar!!.selectedTab.position)
         }
 
-        LastFilesMaster.saveSlots(this);
-    }
-
-    /**
-     * @return An instance of MainActivity
-     */
-    public static MainActivity getInstance() {
-        return activity;
+        LastFilesMaster.saveSlots(this)
     }
 
     /**
@@ -335,28 +297,34 @@ public class MainActivity extends FragmentActivity {
      *
      * @param size The text size to apply
      */
-    private void setTextSize(int size) {
-        for (int i = 0; i < getActionBar().getTabCount(); i++) {
-            ActionBar.Tab tab = getActionBar().getTabAt(i);
-            EditorFragment fragment = (EditorFragment) tab.getTag();
-            fragment.getEditor().setTextSize(size);
+    private fun setTextSize(size: Int) {
+        for (i in 0 until actionBar!!.tabCount) {
+            val tab = actionBar!!.getTabAt(i)
+            val fragment = tab.tag as EditorFragment
+            fragment.editor!!.textSize = size.toFloat()
         }
-        SharedPreferences.Editor prefEditor = pref.edit();
-        prefEditor.putInt(PREF_TEXT_SIZE, size);
-        prefEditor.apply();
+        val prefEditor = pref.edit()
+        prefEditor.putInt(PREF_TEXT_SIZE, size)
+        prefEditor.apply()
         // TODO: Consider recreating the activity at that point to avoid iterating through tabs
     }
 
-    @Nullable
-    @Override
-    public Object onRetainCustomNonConfigurationInstance() {
-        int tabCount = getActionBar().getTabCount();
-        LinkedHashMap<String, ActionBar.Tab> tabs = new LinkedHashMap<>();
-        for (int i = 0; i < tabCount; i++) {
-            ActionBar.Tab tab = getActionBar().getTabAt(i);
-            tabs.put(((EditorFragment) tab.getTag()).getTag(), tab);
+    override fun onRetainCustomNonConfigurationInstance(): Any? {
+        val tabCount = actionBar!!.tabCount
+        val tabs = LinkedHashMap<String, ActionBar.Tab>()
+        for (i in 0 until tabCount) {
+            val tab = actionBar!!.getTabAt(i)
+            tabs[(tab.tag as EditorFragment).tag!!] = tab
         }
-        return tabs;
+        return tabs
+    }
+
+    companion object {
+
+        /**
+         * @return An instance of MainActivity
+         */
+        lateinit var instance: MainActivity
     }
 
 }

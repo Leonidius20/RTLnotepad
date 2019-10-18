@@ -1,45 +1,44 @@
-package ua.leonidius.rtlnotepad.dialogs;
+package ua.leonidius.rtlnotepad.dialogs
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
-import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
-import ua.leonidius.rtlnotepad.EditorFragment;
-import ua.leonidius.rtlnotepad.R;
+import android.app.AlertDialog
+import android.app.Dialog
+import android.content.DialogInterface
+import android.os.Bundle
+import androidx.fragment.app.DialogFragment
+import ua.leonidius.rtlnotepad.EditorFragment
+import ua.leonidius.rtlnotepad.R
 
-public class PermissionRequestDialog extends DialogFragment implements AlertDialog.OnClickListener {
+class PermissionRequestDialog : DialogFragment(), DialogInterface.OnClickListener {
 
-    private int type;
-    public static String TYPE = "type";
+    private var type: Int = 0
 
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        type = getArguments().getInt(TYPE);
-        AlertDialog.Builder adb = new AlertDialog.Builder(getContext());
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        type = arguments!!.getInt(TYPE)
+        val adb = AlertDialog.Builder(context)
 
         if (type == EditorFragment.READ_PERMISSION_CODE) {
-            adb.setMessage(R.string.grant_read_permissions);
+            adb.setMessage(R.string.grant_read_permissions)
         } else {
-            adb.setMessage(R.string.grant_write_permissions);
+            adb.setMessage(R.string.grant_write_permissions)
         }
 
-        adb.setPositiveButton(android.R.string.yes, this);
-        adb.setNegativeButton(android.R.string.no, this);
+        adb.setPositiveButton(android.R.string.yes, this)
+        adb.setNegativeButton(android.R.string.no, this)
 
-        return adb.create();
+        return adb.create()
     }
 
-    @Override
-    public void onClick(DialogInterface dialog, int which) {
+    override fun onClick(dialog: DialogInterface, which: Int) {
         if (which == AlertDialog.BUTTON_POSITIVE) {
             if (type == EditorFragment.READ_PERMISSION_CODE) {
-                ((EditorFragment) getParentFragment()).tryReadingFileAgain();
-            } else ((EditorFragment) getParentFragment()).tryWritingFileAgain();
+                (parentFragment as EditorFragment).tryReadingFileAgain()
+            } else
+                (parentFragment as EditorFragment).tryWritingFileAgain()
         }
+    }
+
+    companion object {
+        var TYPE = "type"
     }
 
 }

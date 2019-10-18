@@ -1,106 +1,105 @@
-package ru.elifantiev.android.roboerrorreporter;
+package ru.elifantiev.android.roboerrorreporter
 
-import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.os.Environment;
+import android.content.Context
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
+import android.os.Environment
+import java.io.File
+import java.io.FileWriter
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+internal class ExceptionHandler private constructor(context: Context, chained: Boolean) : Thread.UncaughtExceptionHandler {
 
-final class ExceptionHandler implements Thread.UncaughtExceptionHandler {
+    private val formatter = SimpleDateFormat("dd.MM.yy HH:mm", Locale.US)
+    private val fileFormatter = SimpleDateFormat("dd-MM-yy", Locale.US)
+    private var versionName = "0"
+    private var versionCode = 0
+    private val stacktraceDir: String
+    private val previousHandler: Thread.UncaughtExceptionHandler?
 
-    private final DateFormat formatter = new SimpleDateFormat("dd.MM.yy HH:mm", Locale.US);
-    private final DateFormat fileFormatter = new SimpleDateFormat("dd-MM-yy", Locale.US);
-    private String versionName = "0";
-    private int versionCode = 0;
-    private final String stacktraceDir;
-    private final Thread.UncaughtExceptionHandler previousHandler;
+    init {
 
-    private ExceptionHandler(Context context, boolean chained) {
-
-        PackageManager mPackManager = context.getPackageManager();
-        PackageInfo mPackInfo;
+        val mPackManager = context.packageManager
+        val mPackInfo: PackageInfo
         try {
-            mPackInfo = mPackManager.getPackageInfo(context.getPackageName(), 0);
-            versionName = mPackInfo.versionName;
-            versionCode = mPackInfo.versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
+            mPackInfo = mPackManager.getPackageInfo(context.packageName, 0)
+            versionName = mPackInfo.versionName
+            versionCode = mPackInfo.versionCode
+        } catch (e: PackageManager.NameNotFoundException) {
             // ignore
         }
-        if(chained)
-            previousHandler = Thread.getDefaultUncaughtExceptionHandler();
+
+        if (chained)
+            previousHandler = Thread.getDefaultUncaughtExceptionHandler()
         else
-            previousHandler = null;
-        stacktraceDir = String.format("/Android/data/%s/files/", context.getPackageName());
+            previousHandler = null
+        stacktraceDir = String.format("/Android/data/%s/files/", context.packageName)
     }
 
-    static ExceptionHandler inContext(Context context) {
-        return new ExceptionHandler(context, true);
-    }
+    override fun uncaughtException(thread: Thread, exception: Throwable) {
+        val state = Environment.getExternalStorageState()
+        val dumpDate = Date(System.currentTimeMillis())
+        if (Environment.MEDIA_MOUNTED == state) {
 
-    static ExceptionHandler reportOnlyHandler(Context context) {
-        return new ExceptionHandler(context, false);
-    }
-
-    @Override
-    public void uncaughtException(Thread thread, Throwable exception) {
-        final String state = Environment.getExternalStorageState();
-        final Date dumpDate = new Date(System.currentTimeMillis());
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-
-            StringBuilder reportBuilder = new StringBuilder();
+            val reportBuilder = StringBuilder()
             reportBuilder
-				.append("\n\n\n")
-				.append(formatter.format(dumpDate)).append("\n")
-				.append(String.format("Version: %s (%d)\n", versionName, versionCode))
-				.append(thread.toString()).append("\n");
-            processThrowable(exception, reportBuilder);
+                    .append("\n\n\n")
+                    .append(formatter.format(dumpDate)).append("\n")
+                    .append(String.format("Version: %s (%d)\n", versionName, versionCode))
+                    .append(thread.toString()).append("\n")
+            processThrowable(exception, reportBuilder)
 
-            File sd = Environment.getExternalStorageDirectory();
-            File stacktrace = new File(
-				sd.getPath() + stacktraceDir,
-				String.format(
-					"stacktrace-%s.txt",
-					fileFormatter.format(dumpDate)));
-            File dumpdir = stacktrace.getParentFile();
-            boolean dirReady = dumpdir.isDirectory() || dumpdir.mkdirs();
+            val sd = Environment.getExternalStorageDirectory()
+            val stacktrace = File(
+                    sd.path + stacktraceDir,
+                    String.format(
+                            "stacktrace-%s.txt",
+                            fileFormatter.format(dumpDate)))
+            val dumpdir = stacktrace.parentFile
+            val dirReady = dumpdir!!.isDirectory || dumpdir.mkdirs()
             if (dirReady) {
-                FileWriter writer = null;
+                var writer: FileWriter? = null
                 try {
-                    writer = new FileWriter(stacktrace, true);
-                    writer.write(reportBuilder.toString());
-                } catch (IOException e) {
+                    writer = FileWriter(stacktrace, true)
+                    writer.write(reportBuilder.toString())
+                } catch (e: IOException) {
                     // ignore
                 } finally {
                     try {
-                        if (writer != null)
-                            writer.close();
-                    } catch (IOException e) {
+                        writer?.close()
+                    } catch (e: IOException) {
                         // ignore
                     }
+
                 }
             }
         }
-        if(previousHandler != null)
-            previousHandler.uncaughtException(thread, exception);
+        previousHandler?.uncaughtException(thread, exception)
     }
 
-    private void processThrowable(Throwable exception, StringBuilder builder) {
-        if(exception == null)
-            return;
-        StackTraceElement[] stackTraceElements = exception.getStackTrace();
+    private fun processThrowable(exception: Throwable?, builder: StringBuilder) {
+        if (exception == null)
+            return
+        val stackTraceElements = exception.stackTrace
         builder
-			.append("Exception: ").append(exception.getClass().getName()).append("\n")
-			.append("Message: ").append(exception.getMessage()).append("\nStacktrace:\n");
-        for(StackTraceElement element : stackTraceElements) {
-            builder.append("\t").append(element.toString()).append("\n");
+                .append("Exception: ").append(exception.javaClass.getName()).append("\n")
+                .append("Message: ").append(exception.message).append("\nStacktrace:\n")
+        for (element in stackTraceElements) {
+            builder.append("\t").append(element.toString()).append("\n")
         }
-        processThrowable(exception.getCause(), builder);
+        processThrowable(exception.cause, builder)
+    }
+
+    companion object {
+
+        fun inContext(context: Context): ExceptionHandler {
+            return ExceptionHandler(context, true)
+        }
+
+        fun reportOnlyHandler(context: Context): ExceptionHandler {
+            return ExceptionHandler(context, false)
+        }
     }
 }

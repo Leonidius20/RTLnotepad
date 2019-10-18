@@ -1,44 +1,38 @@
-package ua.leonidius.rtlnotepad.dialogs;
+package ua.leonidius.rtlnotepad.dialogs
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.content.DialogInterface;
-import android.os.Bundle;
-import ua.leonidius.rtlnotepad.R;
+import android.app.AlertDialog
+import android.app.Dialog
+import android.content.DialogInterface
+import android.os.Bundle
+import androidx.fragment.app.DialogFragment
+import ua.leonidius.rtlnotepad.R
 
-public class WrongFileTypeDialog extends DialogFragment implements AlertDialog.OnClickListener {
+class WrongFileTypeDialog : DialogFragment(), DialogInterface.OnClickListener {
 
-    private Callback callback;
+    private var callback: Callback? = null // TODO("ViewModel")
 
-    @Override
-    public void onClick(DialogInterface p1, int id) {
-        switch (id) {
-            case Dialog.BUTTON_NEGATIVE:
-                callback.callback(false);
-                break;
-            case Dialog.BUTTON_POSITIVE:
-                callback.callback(true);
-                break;
+    override fun onClick(p1: DialogInterface, id: Int) {
+        when (id) {
+            Dialog.BUTTON_NEGATIVE -> callback!!.callback(false)
+            Dialog.BUTTON_POSITIVE -> callback!!.callback(true)
         }
     }
 
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
-        adb.setCancelable(false);
-        adb.setMessage(R.string.wrong_file_type_warning);
-        adb.setNegativeButton(android.R.string.no, this);
-        adb.setPositiveButton(android.R.string.yes, this);
-        return adb.create();
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val adb = AlertDialog.Builder(activity)
+        adb.setCancelable(false)
+        adb.setMessage(R.string.wrong_file_type_warning)
+        adb.setNegativeButton(android.R.string.no, this)
+        adb.setPositiveButton(android.R.string.yes, this)
+        return adb.create()
     }
 
-    public void setCallback(Callback callback) {
-        this.callback = callback;
+    fun setCallback(callback: Callback) {
+        this.callback = callback
     }
 
-    public interface Callback {
-        void callback(boolean open);
+    interface Callback {
+        fun callback(open: Boolean)
     }
 
 }

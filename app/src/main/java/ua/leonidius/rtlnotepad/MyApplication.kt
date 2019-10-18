@@ -1,14 +1,13 @@
-package ua.leonidius.rtlnotepad;
+package ua.leonidius.rtlnotepad
 
-import android.app.Application;
-import ru.elifantiev.android.roboerrorreporter.RoboErrorReporter;
+import android.app.Application
+import ru.elifantiev.android.roboerrorreporter.RoboErrorReporter
 
-public class MyApplication extends Application {
+class MyApplication : Application() {
 
-    @Override
-    public void onCreate() {
-        RoboErrorReporter.bindReporter(this);
-        super.onCreate();
+    override fun onCreate() {
+        RoboErrorReporter.bindReporter(this)
+        super.onCreate()
     }
 
 }

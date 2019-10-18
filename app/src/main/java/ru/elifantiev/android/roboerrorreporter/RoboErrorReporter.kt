@@ -1,7 +1,7 @@
-package ru.elifantiev.android.roboerrorreporter;
+package ru.elifantiev.android.roboerrorreporter
 
 
-import android.content.Context;
+import android.content.Context
 
 /**
  * Simple error reporting facility.
@@ -9,22 +9,20 @@ import android.content.Context;
  * Files are saved to folder Android/data/your.package.name/files/stacktrace-dd-MM-YY.txt
  *
  * To apply error reporting simply do the following
- *   RoboErrorReporter.bindReporter(yourContext);
+ * RoboErrorReporter.bindReporter(yourContext);
  */
-public final class RoboErrorReporter {
-
-    private RoboErrorReporter() {}
+object RoboErrorReporter {
 
     /**
      * Apply error reporting to a specified application context
      * @param context context for which errors are reported (used to get package name)
      */
-    public static void bindReporter(Context context) {
-        Thread.setDefaultUncaughtExceptionHandler(ExceptionHandler.inContext(context));
+    fun bindReporter(context: Context) {
+        Thread.setDefaultUncaughtExceptionHandler(ExceptionHandler.inContext(context))
     }
 
-    public static void reportError(Context context, Throwable error) {
-        ExceptionHandler.reportOnlyHandler(context).uncaughtException(Thread.currentThread(), error);
+    fun reportError(context: Context, error: Throwable) {
+        ExceptionHandler.reportOnlyHandler(context).uncaughtException(Thread.currentThread(), error)
     }
 
 }

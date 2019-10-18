@@ -1,48 +1,41 @@
-package ua.leonidius.rtlnotepad;
+package ua.leonidius.rtlnotepad
 
-import android.content.Context;
-import android.graphics.Canvas;
-import android.text.DynamicLayout;
-import android.text.Layout;
-import android.text.TextPaint;
-import android.util.AttributeSet;
-import android.view.View;
+import android.content.Context
+import android.graphics.Canvas
+import android.text.DynamicLayout
+import android.text.Layout
+import android.text.TextPaint
+import android.util.AttributeSet
+import android.view.View
 
 /**
  * This is an attempt to reimplement EditTest in a way that it only renders the text visible
  * on screen at any given point. It is expected to give a performance boost for editing long text files.
  */
 
-public class TestingTextEditor extends View {
+class TestingTextEditor : View {
 
-    private DynamicLayout layout;
+    private var layout: DynamicLayout? = null
 
-    public TestingTextEditor(Context context) {
-        super(context);
-    }
+    constructor(context: Context) : super(context) {}
 
-    public TestingTextEditor(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {}
 
-    public TestingTextEditor(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {}
 
-    public void setText(CharSequence text) {
-        TextPaint textPaint = new TextPaint();
+    fun setText(text: CharSequence) {
+        val textPaint = TextPaint()
         //int width = get screen width
-        layout = new DynamicLayout(text, textPaint, getWidth(), Layout.Alignment.ALIGN_NORMAL, 10, 10, false);
-        invalidate();
-        requestLayout();
+        layout = DynamicLayout(text, textPaint, width, Layout.Alignment.ALIGN_NORMAL, 10f, 10f, false)
+        invalidate()
+        requestLayout()
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        canvas.save();
-        if (layout != null) layout.draw(canvas);
-        canvas.restore();
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        canvas.save()
+        if (layout != null) layout!!.draw(canvas)
+        canvas.restore()
     }
 
 }
