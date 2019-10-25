@@ -12,13 +12,15 @@ import androidx.lifecycle.ViewModelProvider
 class RewriteDialog : DialogFragment(), DialogInterface.OnClickListener {
 
     private var viewModel : Model? = null;
-    private val initializer = Initializer()
+    private var initializerFunction : (() -> Unit)? = null
 
     companion object {
 
         fun create(callback: (Boolean) -> Unit): RewriteDialog {
             val dialog = RewriteDialog()
-            dialog.initializer.callback = callback
+            dialog.initializerFunction = {
+                dialog.getViewModel().callback = callback
+            }
             return dialog
         }
 
@@ -33,10 +35,8 @@ class RewriteDialog : DialogFragment(), DialogInterface.OnClickListener {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (!getViewModel().initialized) {
-            initializer.initialize()
-            getViewModel().initialized = true
-        }
+        initializerFunction?.invoke()
+        initializerFunction = null
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -56,16 +56,7 @@ class RewriteDialog : DialogFragment(), DialogInterface.OnClickListener {
     }
 
     class Model : ViewModel() {
-        internal var initialized = false
         internal var callback: ((Boolean) -> Unit)? = null
-    }
-
-    inner class Initializer {
-        internal var callback: ((Boolean) -> Unit)? = null
-
-        internal fun initialize() {
-            getViewModel().callback = callback
-        }
     }
 
 }

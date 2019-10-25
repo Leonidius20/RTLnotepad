@@ -15,14 +15,18 @@ import java.io.File
 class OpenDialog : NavigationDialog() {
 
     private lateinit var viewModel: Model
-    private val initializer = Initializer()
+    private var initializerFunction : (() -> Unit)? = null
 
     companion object {
 
         fun create(defaultDir: File = Environment.getExternalStorageDirectory(), callback: (File) -> Unit): OpenDialog {
             val dialog = OpenDialog()
-            dialog.initializer.defaultDir = defaultDir
-            dialog.initializer.callback = callback
+            dialog.initializerFunction = {
+                with (dialog.getViewModel()) {
+                    this.currentDir = defaultDir
+                    this.callback = callback
+                }
+            }
             return dialog
         }
 
@@ -36,10 +40,8 @@ class OpenDialog : NavigationDialog() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (!getViewModel().initialized) {
-            initializer.initialize()
-            getViewModel().initialized = true
-        }
+        initializerFunction?.invoke()
+        initializerFunction = null
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -74,18 +76,7 @@ class OpenDialog : NavigationDialog() {
     }*/
 
     class Model : NavigationDialog.NavDialogViewModel() {
-        internal var initialized = false
         internal lateinit var callback: ((File) -> Unit)
-    }
-
-    private inner class Initializer {
-        internal lateinit var defaultDir: File
-        internal lateinit var callback: ((File) -> Unit)
-
-        internal fun initialize() {
-            getViewModel().currentDir = defaultDir
-            getViewModel().callback = callback
-        }
     }
 
 }

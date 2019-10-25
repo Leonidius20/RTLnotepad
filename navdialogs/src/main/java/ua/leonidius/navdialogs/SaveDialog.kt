@@ -21,8 +21,7 @@ class SaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
     private lateinit var nameField: EditText
     private lateinit var encodingSpinner: Spinner
     private lateinit var viewModel: Model
-    private val initializer = Initializer()
-    private lateinit var initializerFunction : () -> Unit
+    private var initializerFunction : (() -> Unit)? = null
 
     companion object {
 
@@ -38,10 +37,6 @@ class SaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
                     this.callback = callback
                 }
             }
-            dialog.initializer.defaultEncoding = defaultEncoding
-            dialog.initializer.defaultFileName = defaultName
-            dialog.initializer.defaultDir = defaultDirectory
-            dialog.initializer.callback = callback
             return dialog
         }
 
@@ -49,10 +44,8 @@ class SaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (!getViewModel().initialized) {
-            initializer.initialize()
-            getViewModel().initialized = true
-        }
+        initializerFunction?.invoke()
+        initializerFunction = null
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -126,7 +119,6 @@ class SaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
     }
 
     class Model : NavigationDialog.NavDialogViewModel() {
-        internal var initialized = false
         internal lateinit var callback: ((File, String) -> Unit)
         internal lateinit var fileName: String
         internal lateinit var currentEncoding: String
@@ -138,20 +130,6 @@ class SaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
                 availableEncodings = Charset.availableCharsets().keys.toTypedArray()
             }
             return availableEncodings
-        }
-    }
-
-    private inner class Initializer {
-        internal lateinit var defaultDir: File
-        internal lateinit var defaultFileName: String
-        internal lateinit var defaultEncoding: String
-        internal lateinit var callback: ((File, String) -> Unit)
-
-        internal fun initialize() {
-            getViewModel().currentDir = defaultDir
-            getViewModel().fileName = defaultFileName
-            getViewModel().currentEncoding = defaultEncoding
-            getViewModel().callback = callback
         }
     }
 
