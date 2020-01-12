@@ -11,12 +11,11 @@ import ua.leonidius.rtlnotepad.R
 
 class EncodingAdapter(internal var context: Context, private var data: Array<String>, var selectedEncoding: String) : ArrayAdapter<String>(context, R.layout.encoding_list_item, R.id.radio_text, data) {
 
-    override fun getView(position: Int, convertView: View?, p3: ViewGroup): View {
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         var view = convertView
 
         if (view == null) {
-            val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-            view = inflater.inflate(R.layout.encoding_list_item, null, false)
+            view = LayoutInflater.from(context).inflate(R.layout.encoding_list_item, parent, false)
         }
 
         val tv = view!!.findViewById<TextView>(R.id.radio_text)

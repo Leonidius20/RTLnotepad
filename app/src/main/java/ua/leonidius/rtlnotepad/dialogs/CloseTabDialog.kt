@@ -54,7 +54,7 @@ class CloseTabDialog : DialogFragment(), DialogInterface.OnClickListener {
 
     private fun getViewModel() : Model {
         if (!this::viewModel.isInitialized) {
-            viewModel = ViewModelProvider(this)[viewModel.javaClass]
+            viewModel = ViewModelProvider(this).get(Model::class.java)
         }
         return viewModel as Model
     }

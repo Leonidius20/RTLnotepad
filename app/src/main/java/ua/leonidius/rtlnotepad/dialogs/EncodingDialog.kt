@@ -18,28 +18,28 @@ import java.nio.charset.Charset
 class EncodingDialog : DialogFragment(), DialogInterface.OnClickListener {
 
     private lateinit var viewModel: ViewModel
-    private val initializer = Initializer()
+    private var initializerFunction : (() -> Unit)? = null
     private lateinit var adapter: EncodingAdapter
 
     companion object {
         fun create(currentEncoding: String, callback: (String) -> Unit): EncodingDialog {
             val dialog = EncodingDialog()
-            dialog.initializer.currentEncoding = currentEncoding
-            dialog.initializer.callback = callback
+            dialog.initializerFunction = {
+                dialog.getViewModel().currentEncoding = currentEncoding
+                dialog.getViewModel().callback = callback
+            }
             return dialog
         }
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val currentEncoding = if (this::viewModel.isInitialized) getViewModel().currentEncoding
-        else initializer.currentEncoding
-
         val adb = AlertDialog.Builder(MainActivity.instance)
         adb.setTitle(R.string.encoding)
         adb.setPositiveButton(R.string.apply, this)
         adb.setNegativeButton(R.string.cancel, this)
 
         val listView = ListView(MainActivity.instance)
+        val currentEncoding = getViewModel().currentEncoding // viewModel must already be initialized by this time
         adapter = EncodingAdapter(MainActivity.instance, Charset.availableCharsets().keys.toTypedArray(), currentEncoding)
         listView.adapter = adapter
         adb.setView(listView)
@@ -49,7 +49,8 @@ class EncodingDialog : DialogFragment(), DialogInterface.OnClickListener {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        initializer.initialize()
+        initializerFunction?.invoke()
+        initializerFunction = null
     }
 
     override fun onClick(p1: DialogInterface, id: Int) {
@@ -60,7 +61,7 @@ class EncodingDialog : DialogFragment(), DialogInterface.OnClickListener {
 
     fun getViewModel(): Model {
         if (!this::viewModel.isInitialized) {
-            viewModel = ViewModelProvider(this)[viewModel.javaClass]
+            viewModel = ViewModelProvider(this).get(Model::class.java)
         }
         return viewModel as Model
     }
@@ -68,16 +69,6 @@ class EncodingDialog : DialogFragment(), DialogInterface.OnClickListener {
     class Model : ViewModel() {
         lateinit var currentEncoding: String
         lateinit var callback: (String) -> Unit
-    }
-
-    inner class Initializer {
-        lateinit var currentEncoding: String
-        lateinit var callback: (String) -> Unit
-
-        fun initialize() {
-            getViewModel().currentEncoding = currentEncoding
-            getViewModel().callback = callback
-        }
     }
 
 }

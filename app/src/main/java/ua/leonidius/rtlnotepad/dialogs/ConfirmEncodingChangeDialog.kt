@@ -13,13 +13,15 @@ import ua.leonidius.rtlnotepad.R
 
 class ConfirmEncodingChangeDialog : DialogFragment(), DialogInterface.OnClickListener {
 
-    private lateinit var viewModel: Model;
-    private val initializer: Initializer = Initializer()
+    private lateinit var viewModel: Model
+    private var initializerFunction : (() -> Unit)? = null
 
     companion object {
         fun create(callback : (Boolean) -> Unit) : ConfirmEncodingChangeDialog {
             val dialog = ConfirmEncodingChangeDialog()
-            dialog.initializer.callback = callback;
+            dialog.initializerFunction = {
+                dialog.getViewModel().callback = callback
+            }
             return dialog
         }
     }
@@ -35,7 +37,8 @@ class ConfirmEncodingChangeDialog : DialogFragment(), DialogInterface.OnClickLis
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        initializer.initialize()
+        initializerFunction?.invoke()
+        initializerFunction = null
     }
 
     override fun onClick(p1: DialogInterface, id: Int) {
@@ -54,14 +57,6 @@ class ConfirmEncodingChangeDialog : DialogFragment(), DialogInterface.OnClickLis
 
     class Model : ViewModel() {
         lateinit var callback : (Boolean) -> Unit
-    }
-
-    inner class Initializer {
-        lateinit var callback : (Boolean) -> Unit
-
-        fun initialize() {
-            getViewModel().callback = callback
-        }
     }
 
 }

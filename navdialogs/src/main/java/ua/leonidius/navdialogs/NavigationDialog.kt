@@ -1,16 +1,13 @@
 package ua.leonidius.navdialogs
 
 import android.app.Dialog
-import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.*
 import android.widget.AdapterView.OnItemClickListener
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModel
-
 import java.io.File
 
 /**
@@ -38,11 +35,11 @@ abstract class NavigationDialog : DialogFragment(), OnItemClickListener {
         pathView = dialogView.findViewById(R.id.pathview)
         filesList = dialogView.findViewById(R.id.listview)
         filesList!!.onItemClickListener = this
-        val inflater = context!!.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val header = inflater.inflate(R.layout.navdialogs_files_list_item, null, false)
-        val imageView = header.findViewById<ImageView>(R.id.listitem_icon)
+        //val inflater = context!!.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val header = layoutInflater.inflate(R.layout.navdialogs_files_list_item, null, false)
+        val imageView = header.findViewById(R.id.listitem_icon) as ImageView
         imageView.setImageResource(R.drawable.up)
-        val headerText = header.findViewById<TextView>(R.id.listitem_text)
+        val headerText = header.findViewById(R.id.listitem_text) as TextView
         headerText.setText(R.string.up)
         filesList!!.addHeaderView(header)
     }

@@ -53,7 +53,7 @@ class SaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
         adb.setTitle(R.string.save_as)
         adb.setPositiveButton(android.R.string.ok, this)
 
-        val inflater = context!!.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val inflater =  LayoutInflater.from(context)
         val dialogView = inflater.inflate(R.layout.navdialogs_dialog_save_as, null, false)
         initView(dialogView)
         adb.setView(dialogView)

@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 
 class RewriteDialog : DialogFragment(), DialogInterface.OnClickListener {
 
-    private var viewModel : Model? = null;
+    private var viewModel : Model? = null
     private var initializerFunction : (() -> Unit)? = null
 
     companion object {
@@ -50,7 +50,7 @@ class RewriteDialog : DialogFragment(), DialogInterface.OnClickListener {
 
     private fun getViewModel(): Model {
         if (viewModel == null) {
-            viewModel = ViewModelProvider(this).get(Model::class.java!!)
+            viewModel = ViewModelProvider(this).get(Model::class.java)
         }
         return viewModel as Model
     }
