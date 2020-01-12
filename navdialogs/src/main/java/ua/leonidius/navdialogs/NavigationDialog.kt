@@ -2,6 +2,7 @@ package ua.leonidius.navdialogs
 
 import android.app.Dialog
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.*
@@ -32,14 +33,15 @@ abstract class NavigationDialog : DialogFragment(), OnItemClickListener {
     }
 
     protected open fun initView(dialogView: View) {
-        pathView = dialogView.findViewById(R.id.pathview)
-        filesList = dialogView.findViewById(R.id.listview)
+        pathView = dialogView.findViewById(R.id.pathView)
+        filesList = dialogView.findViewById(R.id.filesListView)
         filesList!!.onItemClickListener = this
         //val inflater = context!!.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val header = layoutInflater.inflate(R.layout.navdialogs_files_list_item, null, false)
-        val imageView = header.findViewById(R.id.listitem_icon) as ImageView
+        val inflater = LayoutInflater.from(context)
+        val header = inflater.inflate(R.layout.navdialogs_files_list_item, null, false)
+        val imageView = header.findViewById(R.id.listItemIcon) as ImageView
         imageView.setImageResource(R.drawable.up)
-        val headerText = header.findViewById(R.id.listitem_text) as TextView
+        val headerText = header.findViewById(R.id.listItemText) as TextView
         headerText.setText(R.string.up)
         filesList!!.addHeaderView(header)
     }
@@ -50,7 +52,7 @@ abstract class NavigationDialog : DialogFragment(), OnItemClickListener {
             return
         }
         val path: String
-        val name = (item.findViewById<View>(R.id.listitem_text) as TextView).text.toString()
+        val name = (item.findViewById<View>(R.id.listItemText) as TextView).text.toString()
         if (getViewModel().currentDir!!.path == "/")
             path = getViewModel().currentDir!!.path + name
         else

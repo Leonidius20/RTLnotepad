@@ -30,7 +30,7 @@ internal object AdapterFactory {
             data.add(m)
         }
         val from = arrayOf("name", "icon")
-        val to = intArrayOf(R.id.listitem_text, R.id.listitem_icon)
+        val to = intArrayOf(R.id.listItemText, R.id.listItemIcon)
         return SimpleAdapter(context, data, R.layout.navdialogs_files_list_item, from, to)
     }
 

@@ -8,13 +8,13 @@
 	<ImageView
 		android:layout_height="45dp"
 		android:layout_width="45dp"
-		android:id="@+id/listitem_icon"/>
+		android:id="@+id/listItemIcon"/>
 
 	<TextView
 		android:layout_height="match_parent"
 		android:textAppearance="?android:attr/textAppearanceMedium"
 		android:layout_width="match_parent"
-		android:id="@+id/listitem_text"
+		android:id="@+id/listItemText"
 		android:gravity="center_vertical"
 		android:paddingLeft="10dp"
 		android:paddingRight="10dp"/>

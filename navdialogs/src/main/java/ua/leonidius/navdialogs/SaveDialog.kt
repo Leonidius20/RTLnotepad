@@ -68,10 +68,10 @@ class SaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
     override fun initView(dialogView: View) {
         super.initView(dialogView)
 
-        nameField = dialogView.findViewById(R.id.saveasdialog_name)
+        nameField = dialogView.findViewById(R.id.nameField)
         nameField.setText(getViewModel().fileName)
 
-        encodingSpinner = dialogView.findViewById(R.id.saveasdialog_encoding_spinner)
+        encodingSpinner = dialogView.findViewById(R.id.encodingSpinner)
 
         val availableEncodings = getViewModel().getAvailableEncodings()
 
