@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 
 /**
- * This fragment is being showed when there is no editor tabs opened.
+ * This fragment is being showed when there are no editor tabs opened.
  *
  * @author Leonidius20
  * Project: RTLnotepad
@@ -21,7 +21,7 @@ class PlaceholderFragment : Fragment() {
 
     companion object {
 
-        internal val TAG = "noEditorFragment"
+        internal const val TAG = "noEditorFragment"
     }
 
 }

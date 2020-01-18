@@ -1,7 +1,7 @@
 package ua.leonidius.rtlnotepad
 
 import android.Manifest
-import android.app.Activity
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.Editable
@@ -22,55 +22,72 @@ import java.io.File
 
 class EditorFragment : Fragment() {
 
+    internal var mTag: String =  System.currentTimeMillis().toString()
+
     var file: File? = null
+    private var currentEncoding = "UTF-8"
     internal var hasUnsavedChanges = false
 
-    //private String textToPaste = null;
-    internal var mTag: String =  System.currentTimeMillis().toString()
-    private var currentEncoding = "UTF-8"
-    var editor: EditText? = null
-        private set
-    private var mActivity: MainActivity? = null
-    private var initialized = false
+    private lateinit var editor: EditText
+    private lateinit var mActivity: MainActivity
 
+    private var initialized = false
+    private var ignoreNextTextChange = false
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mActivity = activity as MainActivity
+        // If it's not a new empty editor, don't trigger afterTextChanged() when setting the text
+        if (arguments != null || initialized) ignoreNextTextChange = true
+    }
 
     // Doesn't get called if fragment is recreated (setRetainInstance(true))
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)
         setHasOptionsMenu(true)
-        mActivity = activity as MainActivity?
-
-        /*if (savedState != null) {
-			// Restoration
-			file = (File)savedState.getSerializable(BUNDLE_FILE);
-			mTag = savedState.getString(BUNDLE_TAG, getTag());
-			currentEncoding = savedState.getString(BUNDLE_CURRENT_ENCODING, "UTF-8");
-			hasUnsavedChanges = savedState.getBoolean(BUNDLE_HAS_UNSAVED_CHANGES, false);
-			initialized = true;
-		}*/
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedState: Bundle?): View? {
-        // Initializing views
         val scrollView = inflater.inflate(R.layout.main, container, false)
         editor = scrollView.findViewById(R.id.editor)
-        editor!!.textSize = mActivity!!.pref.getInt(mActivity!!.PREF_TEXT_SIZE, mActivity!!.SIZE_MEDIUM).toFloat()
-        editor!!.addTextChangedListener(object : TextWatcher {
-
+        editor.textSize = mActivity.pref.getInt(mActivity.PREF_TEXT_SIZE, mActivity.SIZE_MEDIUM).toFloat()
+        editor.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p1: CharSequence, p2: Int, p3: Int, p4: Int) {}
-
             override fun onTextChanged(p1: CharSequence, p2: Int, p3: Int, p4: Int) {}
-
             override fun afterTextChanged(p1: Editable) {
-                setTextChanged(true)
+                if (!ignoreNextTextChange) setTextChanged(true)
+                else ignoreNextTextChange = false
             }
-
         })
 
         return scrollView
     }
 
-    override fun onAttach(activity: Activity) {
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        if (!initialized) { // Cold start
+
+            val arguments = arguments
+            if (arguments != null) {
+                val filePath = arguments.getString(ARGUMENT_FILE_PATH, null)
+                if (filePath != null) file = File(filePath)
+
+                if (file != null) {
+                    readFile(file!!, currentEncoding) { text ->
+                        if (text == null)
+                            close() // Close if failed to read requested file
+                        else
+                            setTextWithProgressDialog(text)
+                            setTextChanged(false)
+                    }
+                }
+
+            }
+            initialized = true
+        }
+    }
+
+    /*override fun onAttach(activity: Activity) {
         super.onAttach(activity)
         if (!initialized) { // Cold start
             currentEncoding = "UTF-8"
@@ -80,20 +97,23 @@ class EditorFragment : Fragment() {
                 val filePath = arguments.getString(ARGUMENT_FILE_PATH, null)
                 if (filePath != null) file = File(filePath)
 
-                if (file != null)
+                if (file != null) {
                     readFile(file!!, currentEncoding) { text ->
                         if (text == null)
                             close() // Close if failed to read requested file
                         else
                             setTextWithProgressDialog(text)
                     }
+                    setTextChanged(false)
+                }
+
             }
             initialized = true
         } else {
             // getting the reference to the new activity, that was created after configuration change
-            mActivity = getActivity() as MainActivity?
+            mActivity = getActivity() as MainActivity
         }
-    }
+    }*/
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.editor_options, menu)
@@ -131,7 +151,7 @@ class EditorFragment : Fragment() {
      */
     private fun openSaveDialog() {
         SaveDialog.create { file, encoding ->
-            writeFile(file, editor!!.text.toString(), encoding) { success ->
+            writeFile(file, editor.text.toString(), encoding) { success ->
                 if (success) {
                     this.file = file
                     this.currentEncoding = encoding
@@ -150,7 +170,7 @@ class EditorFragment : Fragment() {
      * Saves changes in the current file. Doesn't check if the file equals null.
      */
     private fun saveChanges() {
-        writeFile(file!!, editor!!.text.toString(), currentEncoding) { success ->
+        writeFile(file!!, editor.text.toString(), currentEncoding) { success ->
             if (success) {
                 setTextChanged(false)
                 val successMessage = resources.getString(R.string.file_save_success, file!!.name)
@@ -162,18 +182,9 @@ class EditorFragment : Fragment() {
 
     private fun setTextChanged(changed: Boolean) {
         hasUnsavedChanges = changed
-        val selectedTab = mActivity!!.actionBar!!.selectedTab
-
-        val name: String
-        if (file == null)
-            name = getString(R.string.new_document)
-        else
-            name = file!!.name
-
-        if (changed)
-            selectedTab.text = "$name*"
-        else
-            selectedTab.text = name
+        val selectedTab = mActivity.actionBar!!.selectedTab
+        val name: String = if (file == null) getString(R.string.new_document) else file!!.name
+        selectedTab.text = if (changed) "$name*" else name
     }
 
     private fun setEncoding(newEncoding: String) {
@@ -185,7 +196,7 @@ class EditorFragment : Fragment() {
         if (!hasUnsavedChanges) {
             readFile(file!!, newEncoding) { result ->
                 if (result != null) {
-                    editor!!.setText(result)
+                    editor.setText(result)
                     currentEncoding = newEncoding
                 } else {
                     Toast.makeText(activity, R.string.reading_error, Toast.LENGTH_SHORT).show()
@@ -198,7 +209,7 @@ class EditorFragment : Fragment() {
             if (change) {
                 readFile(file!!, newEncoding) { result ->
                     if (result != null) {
-                        editor!!.setText(result)
+                        editor.setText(result)
                         currentEncoding = newEncoding
                     } else {
                         Toast.makeText(activity, R.string.reading_error, Toast.LENGTH_SHORT).show()
@@ -213,32 +224,32 @@ class EditorFragment : Fragment() {
      * Provides an opportunity to save changes if they are not saved.
      */
     private fun close() {
-        val selectedTab = mActivity!!.actionBar!!.selectedTab
+        val selectedTab = mActivity.actionBar!!.selectedTab
 
         if (!hasUnsavedChanges) {
-            mActivity!!.closeTab(selectedTab)
+            mActivity.closeTab(selectedTab)
             return
         }
 
         CloseTabDialog.create { save ->
             if (!save) {
-                mActivity!!.closeTab(selectedTab)
+                mActivity.closeTab(selectedTab)
                 return@create
             }
 
             if (file != null) {
                 saveChanges()
-                mActivity!!.closeTab(selectedTab)
+                mActivity.closeTab(selectedTab)
                 return@create
             }
 
             SaveDialog.create { file, encoding ->
-                writeFile(file, editor!!.text.toString(), encoding) { success ->
+                writeFile(file, editor.text.toString(), encoding) { success ->
                     if (success) {
                         val successMessage = resources.getString(R.string.file_save_success, file.name)
                         Toast.makeText(activity, successMessage, Toast.LENGTH_SHORT).show()
                         LastFilesMaster.add(file)
-                        mActivity!!.closeTab(selectedTab)
+                        mActivity.closeTab(selectedTab)
                     } else {
                         Toast.makeText(activity, R.string.file_save_error, Toast.LENGTH_SHORT).show()
                     }
@@ -248,6 +259,10 @@ class EditorFragment : Fragment() {
         }.show(childFragmentManager, "closeTabDialog")
     }
 
+    fun setEditorTextSize(size: Float) {
+        editor.textSize = size
+    }
+
     /**
      * Sets a specified text to editor and shows a progress dialog while it is being set.
      * @param text Text to set
@@ -255,7 +270,7 @@ class EditorFragment : Fragment() {
     private fun setTextWithProgressDialog(text: CharSequence?) {
         val dialog = LoadingDialog()
         dialog.show(childFragmentManager, "loadingDialog")
-        editor!!.setText(text)
+        editor.setText(text)
         dialog.dismiss()
     }
 
@@ -349,14 +364,14 @@ class EditorFragment : Fragment() {
 
     companion object {
 
-        internal val ARGUMENT_FILE_PATH = "filePath" // will be removed once ViewModel is separated from the fragment
+        internal const val ARGUMENT_FILE_PATH = "filePath" // will be removed once ViewModel is separated from the fragment
         //private val BUNDLE_FILE = "file"
         //private val BUNDLE_TAG = "tag"
         //private val BUNDLE_CURRENT_ENCODING = "currentEncoding"
         //private val BUNDLE_HAS_UNSAVED_CHANGES = "hasUnsavedChanges"
 
-        val READ_PERMISSION_CODE = 0
-        val WRITE_PERMISSION_CODE = 1
+        const val READ_PERMISSION_CODE = 0
+        const val WRITE_PERMISSION_CODE = 1
     }
 
 }

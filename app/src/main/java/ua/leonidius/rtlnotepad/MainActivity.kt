@@ -46,6 +46,8 @@ class MainActivity : FragmentActivity() {
         actionBar!!.navigationMode = ActionBar.NAVIGATION_MODE_TABS
         actionBar.setDisplayShowTitleEnabled(false)
 
+        LastFilesMaster.initSlots(this)
+
         if (savedInstanceState == null) { // Cold start
             addPlaceholderFragmentIfNeeded()
             // Opening a file from intent
@@ -67,8 +69,6 @@ class MainActivity : FragmentActivity() {
                 }
             }
         }
-
-        LastFilesMaster.initSlots(this)
     }
 
     /**
@@ -97,7 +97,7 @@ class MainActivity : FragmentActivity() {
         arguments.putString(EditorFragment.ARGUMENT_FILE_PATH, file.path)
         fragment.arguments = arguments
         fragment.retainInstance = true
-        tab.tag = fragment // Adding fragment as a tag
+        tab.tag = fragment
 
         tab.setTabListener(EditorTabListener())
         actionBar.addTab(tab)
@@ -121,7 +121,7 @@ class MainActivity : FragmentActivity() {
 
         val fragment = EditorFragment()
         fragment.retainInstance = true
-        tab.tag = fragment // Adding fragment as a tag
+        tab.tag = fragment
 
         tab.setTabListener(EditorTabListener())
         actionBar.addTab(tab)
@@ -241,7 +241,6 @@ class MainActivity : FragmentActivity() {
             var placeholder = supportFragmentManager.findFragmentByTag(PlaceholderFragment.TAG)
             if (placeholder == null) {
                 placeholder = PlaceholderFragment()
-                //placeholder.setRetainInstance(true);
             }
 
             val sft = supportFragmentManager.beginTransaction()
@@ -301,7 +300,7 @@ class MainActivity : FragmentActivity() {
         for (i in 0 until actionBar!!.tabCount) {
             val tab = actionBar!!.getTabAt(i)
             val fragment = tab.tag as EditorFragment
-            fragment.editor!!.textSize = size.toFloat()
+            fragment.setEditorTextSize(size.toFloat())
         }
         val prefEditor = pref.edit()
         prefEditor.putInt(PREF_TEXT_SIZE, size)

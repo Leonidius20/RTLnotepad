@@ -20,7 +20,7 @@ class ReadTask(private val file: File, private val encoding: String, private val
             val sb = StringBuilder()
             while (!isCancelled) {
                 val readLine = br.readLine() ?: return sb.toString()
-                if (sb.length != 0) sb.append("\n")
+                if (sb.isNotEmpty()) sb.append("\n")
                 sb.append(readLine)
             }
         } catch (e: Exception) {
