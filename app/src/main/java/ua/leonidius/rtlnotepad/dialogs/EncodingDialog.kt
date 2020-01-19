@@ -1,24 +1,20 @@
 package ua.leonidius.rtlnotepad.dialogs
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
 import android.widget.ListView
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import ua.leonidius.rtlnotepad.MainActivity
 import ua.leonidius.rtlnotepad.R
 import ua.leonidius.rtlnotepad.utils.EncodingAdapter
-
 import java.nio.charset.Charset
 
-class EncodingDialog : DialogFragment(), DialogInterface.OnClickListener {
+class EncodingDialog : BaseDialog(), DialogInterface.OnClickListener {
 
     private lateinit var viewModel: ViewModel
-    private var initializerFunction : (() -> Unit)? = null
     private lateinit var adapter: EncodingAdapter
 
     companion object {
@@ -33,24 +29,18 @@ class EncodingDialog : DialogFragment(), DialogInterface.OnClickListener {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val adb = AlertDialog.Builder(MainActivity.instance)
+        val adb = AlertDialog.Builder(activity)
         adb.setTitle(R.string.encoding)
         adb.setPositiveButton(R.string.apply, this)
         adb.setNegativeButton(R.string.cancel, this)
 
-        val listView = ListView(MainActivity.instance)
+        val listView = ListView(activity)
         val currentEncoding = getViewModel().currentEncoding // viewModel must already be initialized by this time
-        adapter = EncodingAdapter(MainActivity.instance, Charset.availableCharsets().keys.toTypedArray(), currentEncoding)
+        adapter = EncodingAdapter(activity as Activity, Charset.availableCharsets().keys.toTypedArray(), currentEncoding)
         listView.adapter = adapter
         adb.setView(listView)
 
         return adb.create()
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        initializerFunction?.invoke()
-        initializerFunction = null
     }
 
     override fun onClick(p1: DialogInterface, id: Int) {

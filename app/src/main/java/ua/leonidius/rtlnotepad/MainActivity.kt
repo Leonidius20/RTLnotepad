@@ -13,6 +13,7 @@ import androidx.fragment.app.FragmentActivity
 import ua.leonidius.navdialogs.OpenDialog
 import ua.leonidius.rtlnotepad.dialogs.ExitDialog
 import ua.leonidius.rtlnotepad.dialogs.LastFilesDialog
+import ua.leonidius.rtlnotepad.dialogs.WrongFileTypeDialog
 import ua.leonidius.rtlnotepad.utils.LastFilesMaster
 import java.io.File
 import java.util.*
@@ -160,14 +161,22 @@ class MainActivity : FragmentActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.options_open -> {
-                // check if it is a text file using IsText
-                OpenDialog.create { file : File ->
+                // TODO: error when rotating screen on OpenDialog and then
+                // refusing to rewrite when prompted, and then rotating OpenDialog
+                lateinit var dialog : OpenDialog
+                dialog = OpenDialog.create { file : File ->
                     if (!isText(file)) {
-                        // TODO: call WrongFileTypeDialog
+                        WrongFileTypeDialog.create {
+                            if (it) instance.addTab(file)
+                            else dialog.show(instance.supportFragmentManager, "openDialog")
+                        }.show(instance.supportFragmentManager, "WFTDialog")
+                    } else {
+                        // we use 'instance' because otherwise it adds a new
+                        // fragment to the old activity after orientation change
+                        instance.addTab(file)
                     }
-                    instance.addTab(file) // we use 'instance' because otherwise it adds a new
-                                          // fragment to the old activity after orientation change
-                }.show(supportFragmentManager, "openDialog")
+                }
+                dialog.show(supportFragmentManager, "openDialog")
                 return true
             }
             R.id.options_new -> {
@@ -184,7 +193,7 @@ class MainActivity : FragmentActivity() {
             }
             R.id.options_last_files -> {
                 LastFilesDialog.create {
-                    path -> instance.addTab(File(path))
+                    instance.addTab(File(it))
                 }.show(supportFragmentManager, "lastFilesDialog")
                 return true
             }

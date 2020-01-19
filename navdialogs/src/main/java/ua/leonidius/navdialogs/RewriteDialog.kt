@@ -25,8 +25,8 @@ class RewriteDialog : BaseDialog(), DialogInterface.OnClickListener {
 
     override fun onClick(p1: DialogInterface, id: Int) {
         when (id) {
-            Dialog.BUTTON_NEGATIVE -> getViewModel().callback.invoke(false)
-            Dialog.BUTTON_POSITIVE -> getViewModel().callback.invoke(true)
+            Dialog.BUTTON_NEGATIVE -> getViewModel().callback(false)
+            Dialog.BUTTON_POSITIVE -> getViewModel().callback(true)
         }
     }
 

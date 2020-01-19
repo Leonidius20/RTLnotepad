@@ -1,10 +1,12 @@
 package ua.leonidius.navdialogs
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
@@ -41,11 +43,11 @@ class SaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val adb = AlertDialog.Builder(activity)
+        val adb = AlertDialog.Builder(activity as Activity)
         adb.setTitle(R.string.save_as)
         adb.setPositiveButton(android.R.string.ok, this)
 
-        val inflater =  LayoutInflater.from(context)
+        val inflater = LayoutInflater.from(context)
         val dialogView = inflater.inflate(R.layout.navdialogs_dialog_save_as, null, false)
         initView(dialogView)
         adb.setView(dialogView)
@@ -95,12 +97,21 @@ class SaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
             return
         }
 
-        RewriteDialog.create { rewrite ->
+        lateinit var rewriteDialog : RewriteDialog
+        rewriteDialog = RewriteDialog.create { rewrite ->
             if (rewrite)
                 getViewModel().callback(file, encoding)
             else
-                show(parentFragmentManager, "saveDialog")
-        }.show(parentFragmentManager, "rewriteDialog")
+                // crash when activity was recreated after orientation change
+                // technically we can use MainActivity.instance here...
+                if (rewriteDialog.activity != null) {
+                    show(rewriteDialog.activity!!.supportFragmentManager, "saveDialog")
+                } else {
+                    Log.d("SaveDialog", "There is no reference to the new activity, so the SaveDialog couldn't be shown")
+                }
+            rewriteDialog.dialog?.cancel()
+        }
+        rewriteDialog.show(parentFragmentManager, "rewriteDialog")
     }
 
     override fun getViewModel(): Model {

@@ -1,5 +1,6 @@
 package ua.leonidius.navdialogs
 
+import android.app.Activity
 import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -66,7 +67,7 @@ abstract class NavigationDialog : BaseDialog(), OnItemClickListener {
 
     fun openDir(directory: File?) {
         try {
-            filesList.adapter = AdapterFactory.getFileAdapter(context!!, directory!!)
+            filesList.adapter = AdapterFactory.getFileAdapter(activity as Activity, directory!!)
             getViewModel().currentDir = directory
             pathView.text = getViewModel().currentDir!!.path
         } catch (e: Exception) {
