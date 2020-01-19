@@ -7,17 +7,16 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.*
 import android.widget.AdapterView.OnItemClickListener
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModel
 import java.io.File
 
 /**
  * This class is a base for OpenDialog and SaveDialog.
  */
-abstract class NavigationDialog : DialogFragment(), OnItemClickListener {
+abstract class NavigationDialog : BaseDialog(), OnItemClickListener {
 
-    private var pathView: TextView? = null
-    private var filesList: ListView? = null
+    private lateinit var pathView: TextView
+    private lateinit var filesList: ListView
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
@@ -35,15 +34,14 @@ abstract class NavigationDialog : DialogFragment(), OnItemClickListener {
     protected open fun initView(dialogView: View) {
         pathView = dialogView.findViewById(R.id.pathView)
         filesList = dialogView.findViewById(R.id.filesListView)
-        filesList!!.onItemClickListener = this
-        //val inflater = context!!.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        filesList.onItemClickListener = this
         val inflater = LayoutInflater.from(context)
         val header = inflater.inflate(R.layout.navdialogs_files_list_item, null, false)
         val imageView = header.findViewById(R.id.listItemIcon) as ImageView
         imageView.setImageResource(R.drawable.up)
         val headerText = header.findViewById(R.id.listItemText) as TextView
         headerText.setText(R.string.up)
-        filesList!!.addHeaderView(header)
+        filesList.addHeaderView(header)
     }
 
     override fun onItemClick(p1: AdapterView<*>, item: View, position: Int, p4: Long) {
@@ -68,9 +66,9 @@ abstract class NavigationDialog : DialogFragment(), OnItemClickListener {
 
     fun openDir(directory: File?) {
         try {
-            filesList!!.adapter = AdapterFactory.getFileAdapter(context!!, directory!!)
+            filesList.adapter = AdapterFactory.getFileAdapter(context!!, directory!!)
             getViewModel().currentDir = directory
-            pathView!!.text = getViewModel().currentDir!!.path
+            pathView.text = getViewModel().currentDir!!.path
         } catch (e: Exception) {
             Toast.makeText(activity, R.string.folder_open_error, Toast.LENGTH_SHORT).show()
             e.printStackTrace()

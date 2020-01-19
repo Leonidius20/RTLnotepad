@@ -1,7 +1,6 @@
 package ua.leonidius.navdialogs
 
 import android.app.Dialog
-import android.content.Context
 import android.os.Bundle
 import android.os.Environment
 import android.view.LayoutInflater
@@ -15,7 +14,6 @@ import java.io.File
 class OpenDialog : NavigationDialog() {
 
     private lateinit var viewModel: Model
-    private var initializerFunction : (() -> Unit)? = null
 
     companion object {
 
@@ -36,12 +34,6 @@ class OpenDialog : NavigationDialog() {
         val dialog = super.onCreateDialog(savedInstanceState)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         return dialog
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        initializerFunction?.invoke()
-        initializerFunction = null
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -66,14 +58,6 @@ class OpenDialog : NavigationDialog() {
         }
         return viewModel
     }
-
-    /*private boolean isText(File file) {
-        try {
-            return MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString())).split("/")[0].equals("text");
-        } catch (Exception e) {
-            return false;
-        }
-    }*/
 
     class Model : NavigationDialog.NavDialogViewModel() {
         internal lateinit var callback: ((File) -> Unit)

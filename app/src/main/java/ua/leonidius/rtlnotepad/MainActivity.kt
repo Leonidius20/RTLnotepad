@@ -3,9 +3,11 @@ package ua.leonidius.rtlnotepad
 import android.app.ActionBar
 import android.content.Context
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.webkit.MimeTypeMap
 import android.widget.LinearLayout
 import androidx.fragment.app.FragmentActivity
 import ua.leonidius.navdialogs.OpenDialog
@@ -158,7 +160,14 @@ class MainActivity : FragmentActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.options_open -> {
-                OpenDialog.create { file : File -> addTab(file) }.show(supportFragmentManager, "openDialog")
+                // check if it is a text file using IsText
+                OpenDialog.create { file : File ->
+                    if (!isText(file)) {
+                        // TODO: call WrongFileTypeDialog
+                    }
+                    instance.addTab(file) // we use 'instance' because otherwise it adds a new
+                                          // fragment to the old activity after orientation change
+                }.show(supportFragmentManager, "openDialog")
                 return true
             }
             R.id.options_new -> {
@@ -174,10 +183,9 @@ class MainActivity : FragmentActivity() {
                 return true
             }
             R.id.options_last_files -> {
-                // TODO("Replace with concise syntax")
-                val lfd = LastFilesDialog()
-                lfd.setCallback { path -> addTab(File(path)) }
-                lfd.show(supportFragmentManager, "lastFilesDialog")
+                LastFilesDialog.create {
+                    path -> instance.addTab(File(path))
+                }.show(supportFragmentManager, "lastFilesDialog")
                 return true
             }
             R.id.options_textSize_small -> {
@@ -208,7 +216,9 @@ class MainActivity : FragmentActivity() {
             val tab = actionBar!!.getTabAt(i)
             val tabFragment = tab.tag as EditorFragment
             if (tabFragment.hasUnsavedChanges) {
-                ExitDialog().show(supportFragmentManager, "exitDialog")
+                ExitDialog.create { exit ->
+                    if (exit) finish()
+                }.show(supportFragmentManager, "exitDialog")
                 return
             }
         }
@@ -324,6 +334,15 @@ class MainActivity : FragmentActivity() {
          * @return An instance of MainActivity
          */
         lateinit var instance: MainActivity
+
+        private fun isText(file: File) : Boolean {
+            return try {
+                MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString()))!!.split("/")[0] == "text";
+            } catch (e: Exception) {
+                false;
+            }
+        }
+
     }
 
 }

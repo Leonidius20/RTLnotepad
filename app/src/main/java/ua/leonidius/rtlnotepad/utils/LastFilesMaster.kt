@@ -11,9 +11,8 @@ import java.util.*
 /**
  * This class manages the list of last opened files.
  */
-
 object LastFilesMaster {
-    private lateinit var slots: LinkedList<File?>// stores files' paths
+    private lateinit var slots: LinkedList<File?> // stores files' paths
     private val slot_names = arrayOf("slot1", "slot2", "slot3", "slot4", "slot5")
     private const val EMPTY = "empty"
     private const val SLOTS_SIZE = 5
@@ -35,12 +34,12 @@ object LastFilesMaster {
     // Retrieves recent files saved in Preferences. Called in main activity's onCreate()
     fun initSlots(activity: MainActivity) {
         slots = LinkedList()
-        var path: String?
+        var path: String
         var file: File
         for (i in 0 until SLOTS_SIZE) {
-            path = activity.pref.getString(slot_names[i], EMPTY)
+            path = activity.pref.getString(slot_names[i], EMPTY) as String
             if (path != EMPTY) {
-                file = File(path!!)
+                file = File(path)
                 if (file.exists())
                     slots.add(file)
                 else

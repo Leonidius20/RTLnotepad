@@ -2,19 +2,15 @@ package ua.leonidius.rtlnotepad.dialogs
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import ua.leonidius.rtlnotepad.MainActivity
 import ua.leonidius.rtlnotepad.R
 
-class ConfirmEncodingChangeDialog : DialogFragment(), DialogInterface.OnClickListener {
+class ConfirmEncodingChangeDialog : BaseDialog(), DialogInterface.OnClickListener {
 
     private lateinit var viewModel: Model
-    private var initializerFunction : (() -> Unit)? = null
 
     companion object {
         fun create(callback : (Boolean) -> Unit) : ConfirmEncodingChangeDialog {
@@ -27,18 +23,12 @@ class ConfirmEncodingChangeDialog : DialogFragment(), DialogInterface.OnClickLis
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val adb = AlertDialog.Builder(MainActivity.instance)
+        val adb = AlertDialog.Builder(activity)
         adb.setMessage(R.string.encoding_change_warning)
         adb.setNegativeButton(R.string.no, this)
         adb.setPositiveButton(R.string.yes, this)
         adb.setNeutralButton(R.string.cancel, this)
         return adb.create()
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        initializerFunction?.invoke()
-        initializerFunction = null
     }
 
     override fun onClick(p1: DialogInterface, id: Int) {
@@ -50,7 +40,7 @@ class ConfirmEncodingChangeDialog : DialogFragment(), DialogInterface.OnClickLis
 
     fun getViewModel() : Model {
         if (!this::viewModel.isInitialized) {
-            viewModel = ViewModelProvider(this).get(viewModel.javaClass)
+            viewModel = ViewModelProvider(this).get(Model::class.java)
         }
         return viewModel
     }

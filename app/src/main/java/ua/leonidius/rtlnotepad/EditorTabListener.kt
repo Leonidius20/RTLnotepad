@@ -4,6 +4,11 @@ import android.app.ActionBar
 
 class EditorTabListener : ActionBar.TabListener {
 
+    // We can't stop using MainActivity.instance here, because otherwise
+    // after orientation change the previous activity is destroyed and
+    // when we try to detach a fragment from it, the program crashes
+    // because the fragment was attached to a different activity.
+
     override fun onTabSelected(tab: ActionBar.Tab, ft: android.app.FragmentTransaction) {
         val fragment = tab.tag as EditorFragment
         val ft2 = MainActivity.instance.supportFragmentManager.beginTransaction()

@@ -2,7 +2,6 @@ package ua.leonidius.navdialogs
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
 import android.os.Environment
@@ -21,7 +20,6 @@ class SaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
     private lateinit var nameField: EditText
     private lateinit var encodingSpinner: Spinner
     private lateinit var viewModel: Model
-    private var initializerFunction : (() -> Unit)? = null
 
     companion object {
 
@@ -40,12 +38,6 @@ class SaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
             return dialog
         }
 
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        initializerFunction?.invoke()
-        initializerFunction = null
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

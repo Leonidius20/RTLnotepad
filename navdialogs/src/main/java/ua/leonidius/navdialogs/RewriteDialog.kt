@@ -2,17 +2,14 @@ package ua.leonidius.navdialogs
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
-class RewriteDialog : DialogFragment(), DialogInterface.OnClickListener {
+class RewriteDialog : BaseDialog(), DialogInterface.OnClickListener {
 
-    private var viewModel : Model? = null
-    private var initializerFunction : (() -> Unit)? = null
+    private lateinit var viewModel : Model
 
     companion object {
 
@@ -28,15 +25,9 @@ class RewriteDialog : DialogFragment(), DialogInterface.OnClickListener {
 
     override fun onClick(p1: DialogInterface, id: Int) {
         when (id) {
-            Dialog.BUTTON_NEGATIVE -> getViewModel().callback!!.invoke(false)
-            Dialog.BUTTON_POSITIVE -> getViewModel().callback!!.invoke(true)
+            Dialog.BUTTON_NEGATIVE -> getViewModel().callback.invoke(false)
+            Dialog.BUTTON_POSITIVE -> getViewModel().callback.invoke(true)
         }
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        initializerFunction?.invoke()
-        initializerFunction = null
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -49,14 +40,14 @@ class RewriteDialog : DialogFragment(), DialogInterface.OnClickListener {
     }
 
     private fun getViewModel(): Model {
-        if (viewModel == null) {
+        if (!this::viewModel.isInitialized) {
             viewModel = ViewModelProvider(this).get(Model::class.java)
         }
-        return viewModel as Model
+        return viewModel
     }
 
     class Model : ViewModel() {
-        internal var callback: ((Boolean) -> Unit)? = null
+        internal lateinit var callback: ((Boolean) -> Unit)
     }
 
 }

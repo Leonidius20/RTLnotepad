@@ -87,34 +87,6 @@ class EditorFragment : Fragment() {
         }
     }
 
-    /*override fun onAttach(activity: Activity) {
-        super.onAttach(activity)
-        if (!initialized) { // Cold start
-            currentEncoding = "UTF-8"
-
-            val arguments = arguments
-            if (arguments != null) {
-                val filePath = arguments.getString(ARGUMENT_FILE_PATH, null)
-                if (filePath != null) file = File(filePath)
-
-                if (file != null) {
-                    readFile(file!!, currentEncoding) { text ->
-                        if (text == null)
-                            close() // Close if failed to read requested file
-                        else
-                            setTextWithProgressDialog(text)
-                    }
-                    setTextChanged(false)
-                }
-
-            }
-            initialized = true
-        } else {
-            // getting the reference to the new activity, that was created after configuration change
-            mActivity = getActivity() as MainActivity
-        }
-    }*/
-
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.editor_options, menu)
         super.onCreateOptionsMenu(menu, inflater)
