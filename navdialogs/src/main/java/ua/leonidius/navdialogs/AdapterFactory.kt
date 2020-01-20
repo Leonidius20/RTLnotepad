@@ -10,13 +10,11 @@ import kotlin.Comparator
 internal object AdapterFactory {
 
     fun getFileAdapter(context: Context, directory: File): SimpleAdapter {
-        val unsortedFiles = directory.listFiles()
-
         val sortedFiles = sortedSetOf<File>(Comparator { file1, file2 ->
             if (file1.isDirectory && !file2.isDirectory) -1
             else if (!file1.isDirectory && file2.isDirectory) 1
             else file1.name.toLowerCase().compareTo(file2.name.toLowerCase())
-        }, *unsortedFiles!!)
+        }, *directory.listFiles()!!)
 
         val data = ArrayList<Map<String, Any>>()
         var map: MutableMap<String, Any>
