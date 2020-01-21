@@ -1,14 +1,6 @@
 package ua.leonidius.rtlnotepad.dialogs
 
-import android.app.AlertDialog
-import android.app.Dialog
-import android.content.DialogInterface
-import android.os.Bundle
-import androidx.fragment.app.DialogFragment
-import ua.leonidius.rtlnotepad.EditorFragment
-import ua.leonidius.rtlnotepad.R
-
-class PermissionRequestDialog : DialogFragment(), DialogInterface.OnClickListener {
+/*class PermissionRequestDialog : DialogFragment(), DialogInterface.OnClickListener {
 
     private var type: Int = 0
 
@@ -41,4 +33,4 @@ class PermissionRequestDialog : DialogFragment(), DialogInterface.OnClickListene
         var TYPE = "type"
     }
 
-}
+}*/

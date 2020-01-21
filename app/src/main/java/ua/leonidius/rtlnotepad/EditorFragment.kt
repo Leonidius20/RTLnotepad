@@ -3,6 +3,7 @@ package ua.leonidius.rtlnotepad
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -13,11 +14,13 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import ua.leonidius.navdialogs.SaveDialog
-import ua.leonidius.rtlnotepad.dialogs.*
+import ua.leonidius.rtlnotepad.dialogs.CloseTabDialog
+import ua.leonidius.rtlnotepad.dialogs.ConfirmEncodingChangeDialog
+import ua.leonidius.rtlnotepad.dialogs.EncodingDialog
+import ua.leonidius.rtlnotepad.dialogs.LoadingDialog
 import ua.leonidius.rtlnotepad.utils.LastFilesMaster
 import ua.leonidius.rtlnotepad.utils.ReadTask
 import ua.leonidius.rtlnotepad.utils.WriteTask
-
 import java.io.File
 
 class EditorFragment : Fragment() {
@@ -25,6 +28,7 @@ class EditorFragment : Fragment() {
     internal var mTag: String =  System.currentTimeMillis().toString()
 
     var file: File? = null
+    var uri: Uri? = null
     private var currentEncoding = "UTF-8"
     internal var hasUnsavedChanges = false
 
@@ -49,42 +53,54 @@ class EditorFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedState: Bundle?): View? {
         val scrollView = inflater.inflate(R.layout.main, container, false)
+
         editor = scrollView.findViewById(R.id.editor)
-        editor.textSize = mActivity.pref.getInt(mActivity.PREF_TEXT_SIZE, mActivity.SIZE_MEDIUM).toFloat()
-        editor.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(p1: CharSequence, p2: Int, p3: Int, p4: Int) {}
-            override fun onTextChanged(p1: CharSequence, p2: Int, p3: Int, p4: Int) {}
-            override fun afterTextChanged(p1: Editable) {
-                if (!ignoreNextTextChange) setTextChanged(true)
-                else ignoreNextTextChange = false
-            }
-        })
+        editor.apply {
+            textSize =  mActivity.pref.getInt(MainActivity.PREF_TEXT_SIZE, MainActivity.SIZE_MEDIUM).toFloat()
+            addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(p1: CharSequence, p2: Int, p3: Int, p4: Int) {}
+                override fun onTextChanged(p1: CharSequence, p2: Int, p3: Int, p4: Int) {}
+                override fun afterTextChanged(p1: Editable) {
+                    if (!ignoreNextTextChange) setTextChanged(true)
+                    else ignoreNextTextChange = false
+                }
+            })
+        }
 
         return scrollView
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        if (!initialized) { // Cold start
-
-            val arguments = arguments
-            if (arguments != null) {
-                val filePath = arguments.getString(ARGUMENT_FILE_PATH, null)
-                if (filePath != null) file = File(filePath)
-
-                if (file != null) {
-                    readFile(file!!, currentEncoding) { text ->
-                        if (text == null)
-                            close() // Close if failed to read requested file
-                        else
-                            setTextWithProgressDialog(text)
-                            setTextChanged(false)
-                    }
+        if (initialized) return
+        arguments?.getParcelable<Uri>(ARGUMENT_URI)?.also {
+            ReadTask(it, currentEncoding) { text ->
+                if (text == null) close()
+                else {
+                    setTextWithProgressDialog(text)
+                    setTextChanged(false)
                 }
-
-            }
-            initialized = true
+            }.execute()
         }
+        initialized = true
+
+        /*val arguments = arguments
+        if (arguments != null) {
+            val filePath = arguments.getString(ARGUMENT_FILE_PATH, null)
+            if (filePath != null) file = File(filePath)
+
+            if (file != null) {
+                readFile(file!!, currentEncoding) { text ->
+                    if (text == null)
+                        close() // Close if failed to read requested file
+                    else
+                        setTextWithProgressDialog(text)
+                        setTextChanged(false)
+                }
+            }
+
+        }*/
+        //initialized = true
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -160,35 +176,25 @@ class EditorFragment : Fragment() {
     }
 
     private fun setEncoding(newEncoding: String) {
-        if (file == null) {
+        if (uri == null) {
             currentEncoding = newEncoding
             return
         }
 
-        if (!hasUnsavedChanges) {
-            readFile(file!!, newEncoding) { result ->
-                if (result != null) {
-                    editor.setText(result)
+        val readFileAgain = {
+            ReadTask(uri!!, newEncoding) {
+                if (it != null) {
+                    editor.setText(it)
                     currentEncoding = newEncoding
-                } else {
-                    Toast.makeText(activity, R.string.reading_error, Toast.LENGTH_SHORT).show()
-                }
-            }
-            return
+                } else Toast.makeText(activity, R.string.reading_error, Toast.LENGTH_SHORT).show()
+            }.execute()
         }
 
-        ConfirmEncodingChangeDialog.create { change ->
-            if (change) {
-                readFile(file!!, newEncoding) { result ->
-                    if (result != null) {
-                        editor.setText(result)
-                        currentEncoding = newEncoding
-                    } else {
-                        Toast.makeText(activity, R.string.reading_error, Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-        }.show(childFragmentManager, "confirmEncodingChangeDialog")
+        if (hasUnsavedChanges) {
+            ConfirmEncodingChangeDialog.create {
+                if (it) readFileAgain()
+            }.show(childFragmentManager, "confirmEncodingChangeDialog")
+        } else readFileAgain()
     }
 
     /**
@@ -258,7 +264,7 @@ class EditorFragment : Fragment() {
      * @param encoding Encoding to use for decoding of the file
      * @param callback Defines what to do with the results of the operation
      */
-    private fun readFile(file: File, encoding: String, callback: (String) -> Unit) {
+    /*private fun readFile(file: File, encoding: String, callback: (String) -> Unit) {
         if (ContextCompat.checkSelfPermission(activity!!, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             Log.d("RTLnotepad", "No read permission, requesting...")
             // saving data to use in onRequestPermissionsResult()
@@ -275,7 +281,7 @@ class EditorFragment : Fragment() {
             callback.invoke(result)
         }
         task.execute()
-    }
+    }*/
 
     private lateinit var fileToWrite: File
     private lateinit var textToWrite: String
@@ -311,7 +317,7 @@ class EditorFragment : Fragment() {
         task.execute()
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    /*override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             when (requestCode) {
                 READ_PERMISSION_CODE -> tryReadingFileAgain()
@@ -324,11 +330,11 @@ class EditorFragment : Fragment() {
             dialog.arguments = args
             dialog.show(childFragmentManager, "permissionRequestDialog")
         }
-    }
+    }*/
 
-    fun tryReadingFileAgain() {
+    /*fun tryReadingFileAgain() {
         readFile(fileToRead, encodingForReading, readCallback)
-    }
+    }*/
 
     fun tryWritingFileAgain() {
         writeFile(fileToWrite, textToWrite, encodingForWriting, writeCallback)
@@ -337,6 +343,7 @@ class EditorFragment : Fragment() {
     companion object {
 
         internal const val ARGUMENT_FILE_PATH = "filePath" // will be removed once ViewModel is separated from the fragment
+        internal const val ARGUMENT_URI = "URI"
         //private val BUNDLE_FILE = "file"
         //private val BUNDLE_TAG = "tag"
         //private val BUNDLE_CURRENT_ENCODING = "currentEncoding"
