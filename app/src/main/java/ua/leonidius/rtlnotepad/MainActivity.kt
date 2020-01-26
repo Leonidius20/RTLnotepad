@@ -12,7 +12,7 @@ import android.view.MenuItem
 import android.webkit.MimeTypeMap
 import android.widget.LinearLayout
 import androidx.fragment.app.FragmentActivity
-import ua.leonidius.navdialogs.OpenDialog
+import ua.leonidius.navdialogs.LegacyOpenDialog
 import ua.leonidius.rtlnotepad.dialogs.ExitDialog
 import ua.leonidius.rtlnotepad.dialogs.WrongFileTypeDialog
 import ua.leonidius.rtlnotepad.utils.LastFilesMaster
@@ -43,8 +43,8 @@ class MainActivity : FragmentActivity() {
         LastFilesMaster.initSlots(this)
 
         if (savedInstanceState == null) { // Cold start
-            addPlaceholderFragmentIfNeeded()
             intent.data?.let { addTab(it) }
+            addPlaceholderFragmentIfNeeded()
             return
         }
 
@@ -60,42 +60,6 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
-
-    /**
-     * Opens a file in a new tab.
-     *
-     * @param file File to open
-     */
-    /*private fun addTab(file: File) {
-        removePlaceholderFragmentIfNeeded()
-
-        // If the file is already opened, switching to the file's tab
-        val fileTab = getFileTab(file)
-        if (fileTab != null) {
-            actionBar!!.selectTab(fileTab)
-            return
-        }
-
-        // Creating a new tab
-        val actionBar = actionBar
-        val tab = actionBar!!.newTab()
-        tab.text = file.name
-
-        val fragment = EditorFragment()
-        val arguments = Bundle()
-        arguments.putString(EditorFragment.ARGUMENT_FILE_PATH, file.path)
-        fragment.arguments = arguments
-        fragment.retainInstance = true
-        tab.tag = fragment
-
-        tab.setTabListener(EditorTabListener())
-        actionBar.addTab(tab)
-
-        // Selecting the tab
-        actionBar.selectTab(tab)
-
-        LastFilesMaster.add(file)
-    }*/
 
     /**
      * Opens the file with the given Uri in a new tab
@@ -137,7 +101,6 @@ class MainActivity : FragmentActivity() {
      * Adds a tab with a blank editor for a new file
      */
     private fun addTab() {
-        // Detaching noEditorFragment
         removePlaceholderFragmentIfNeeded()
 
         val fragment = EditorFragment().apply { retainInstance = true }
@@ -228,8 +191,8 @@ class MainActivity : FragmentActivity() {
 
     private fun openFile() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-            lateinit var dialog: OpenDialog
-            dialog = OpenDialog.create { file: File ->
+            lateinit var dialog: LegacyOpenDialog
+            dialog = LegacyOpenDialog.create { file: File ->
                 if (!isText(file)) {
                     WrongFileTypeDialog.create {
                         if (it) instance.addTab(Uri.fromFile(file))
@@ -284,23 +247,10 @@ class MainActivity : FragmentActivity() {
         super.onBackPressed()
     }
 
-
-    /*private fun getFileTab(file: File): ActionBar.Tab? {
-        // Iterating over tabs
-        for (i in 0 until actionBar!!.tabCount) {
-            val tab = actionBar!!.getTabAt(i)
-            val tabFragment = tab.tag as EditorFragment
-            if (tabFragment.file != null && tabFragment.file == file) {
-                return tab
-            }
-        }
-        return null
-    }*/
-
     /**
      * Finds a tab in which the specified file is opened.
      *
-     * @param uri File which is opened in the tab we are looking for
+     * @param uriToFind File which is opened in the tab we are looking for
      * @return ActionBar.Tab in which the specified file is opened, if such a tab exists, null otherwise
      */
     private fun getFileTab(uriToFind: Uri) : ActionBar.Tab? {
@@ -315,7 +265,7 @@ class MainActivity : FragmentActivity() {
      * Attaches a PlaceholderFragment if all the tabs are closed.
      */
     private fun addPlaceholderFragmentIfNeeded() {
-        if (actionBar!!.tabCount != 0) {
+        if (actionBar!!.tabCount == 0) {
             val placeholder = supportFragmentManager.findFragmentByTag(PlaceholderFragment.TAG) ?: PlaceholderFragment()
             with (supportFragmentManager.beginTransaction()) {
                 if (!placeholder.isAdded) add(android.R.id.content, placeholder, PlaceholderFragment.TAG)
@@ -396,7 +346,7 @@ class MainActivity : FragmentActivity() {
 
     companion object {
 
-        // Result codes
+        // Request codes
         const val PICK_TEXT_FILE = 0
 
         internal const val SIZE_SMALL = 14

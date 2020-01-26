@@ -11,14 +11,14 @@ import androidx.lifecycle.ViewModelProvider
 
 import java.io.File
 
-class OpenDialog : NavigationDialog() {
+class LegacyOpenDialog : NavigationDialog() {
 
     private lateinit var viewModel: Model
 
     companion object {
 
-        fun create(defaultDir: File = Environment.getExternalStorageDirectory(), callback: (File) -> Unit): OpenDialog {
-            val dialog = OpenDialog()
+        fun create(defaultDir: File = Environment.getExternalStorageDirectory(), callback: (File) -> Unit): LegacyOpenDialog {
+            val dialog = LegacyOpenDialog()
             dialog.initializerFunction = {
                 with (dialog.getViewModel()) {
                     this.currentDir = defaultDir
@@ -38,7 +38,7 @@ class OpenDialog : NavigationDialog() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // TODO: instead of a header put a horizontal layout with "up" and "create folder" options
-        return inflater.inflate(R.layout.navdialogs_dialog_open, container)
+        return inflater.inflate(R.layout.nav_dialogs_open, container)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
