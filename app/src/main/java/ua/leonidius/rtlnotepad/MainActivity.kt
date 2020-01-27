@@ -14,10 +14,12 @@ import android.widget.LinearLayout
 import androidx.fragment.app.FragmentActivity
 import ua.leonidius.navdialogs.LegacyOpenDialog
 import ua.leonidius.rtlnotepad.dialogs.ExitDialog
+import ua.leonidius.rtlnotepad.dialogs.LastFilesDialog
 import ua.leonidius.rtlnotepad.dialogs.WrongFileTypeDialog
 import ua.leonidius.rtlnotepad.utils.LastFilesMaster
 import ua.leonidius.rtlnotepad.utils.getFileName
-import java.io.File
+import ua.leonidius.rtlnotepad.utils.takePersistablePermissions
+import java.io.File // TODO: remove
 import java.util.*
 
 class MainActivity : FragmentActivity() {
@@ -129,7 +131,7 @@ class MainActivity : FragmentActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.options_new, menu)
+        menuInflater.inflate(R.menu.options_main, menu)
         when (pref.getString(PREF_THEME, PREF_THEME_LIGHT)) {
             PREF_THEME_LIGHT -> menu.findItem(R.id.options_theme_light).isChecked = true
             PREF_THEME_DARK -> menu.findItem(R.id.options_theme_dark).isChecked = true
@@ -160,12 +162,12 @@ class MainActivity : FragmentActivity() {
                 setThemeNow(PREF_THEME_DARK, item)
                 return true
             }
-            /*R.id.options_last_files -> {
+            R.id.options_last_files -> {
                 LastFilesDialog.create {
-                    instance.addTab(File(it))
+                    instance.addTab(it)
                 }.show(supportFragmentManager, "lastFilesDialog")
                 return true
-            }*/
+            }
             R.id.options_textSize_small -> {
                 setTextSize(SIZE_SMALL)
                 item.isChecked = true
@@ -181,11 +183,7 @@ class MainActivity : FragmentActivity() {
                 item.isChecked = true
                 return true
             }
-        }/*case R.id.options_test:
-                Intent i = new Intent();
-                i.setClass(this, TestingActivity.class);
-                startActivity(i);
-                return true;*/
+        }
         return super.onOptionsItemSelected(item)
     }
 
@@ -221,12 +219,9 @@ class MainActivity : FragmentActivity() {
         when (requestCode) {
             PICK_TEXT_FILE -> {
                 resultData?.data?.also { uri ->
-                    // Taking persistable permissions
-                    val contentResolver = applicationContext.contentResolver
-                    val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                    contentResolver.takePersistableUriPermission(uri, takeFlags)
-
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                        takePersistablePermissions(this, uri)
+                    }
                     addTab(uri)
                 }
             }
@@ -256,7 +251,7 @@ class MainActivity : FragmentActivity() {
     private fun getFileTab(uriToFind: Uri) : ActionBar.Tab? {
         for (i in 0 until actionBar!!.tabCount) {
             val tab = actionBar!!.getTabAt(i)
-            if ((tab.tag as EditorFragment).run { uri != null && uri == uriToFind }) return tab
+            if ((tab.tag as EditorFragment).run { uri != null && uri!! == uriToFind }) return tab
         }
         return null
     }
@@ -332,7 +327,6 @@ class MainActivity : FragmentActivity() {
             putInt(PREF_TEXT_SIZE, size)
             apply()
         }
-        // TODO: Consider recreating the activity at that point to avoid iterating through tabs
     }
 
     override fun onRetainCustomNonConfigurationInstance(): Any? {

@@ -3,10 +3,6 @@
 	<item
 		android:id="@+id/options_new"
 		android:title="@string/new_file"/>
-
-	<item
-			android:id="@+id/options_test"
-			android:title="To test activity"/>
 	
     <item
         android:id="@+id/options_open"

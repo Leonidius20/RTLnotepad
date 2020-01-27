@@ -17,16 +17,14 @@ import ua.leonidius.rtlnotepad.dialogs.CloseTabDialog
 import ua.leonidius.rtlnotepad.dialogs.ConfirmEncodingChangeDialog
 import ua.leonidius.rtlnotepad.dialogs.EncodingDialog
 import ua.leonidius.rtlnotepad.dialogs.LoadingDialog
-import ua.leonidius.rtlnotepad.utils.LastFilesMaster
-import ua.leonidius.rtlnotepad.utils.ReadTask
-import ua.leonidius.rtlnotepad.utils.WriteTask
-import ua.leonidius.rtlnotepad.utils.getFileName
+import ua.leonidius.rtlnotepad.utils.*
 
 class EditorFragment : Fragment() {
 
     internal var mTag: String =  System.currentTimeMillis().toString()
 
     var uri: Uri? = null
+    private lateinit var tabTitle: String
     private var currentEncoding = "UTF-8"
     internal var hasUnsavedChanges = false
 
@@ -35,6 +33,8 @@ class EditorFragment : Fragment() {
 
     private var initialized = false
     private var ignoreNextTextChange = false
+
+    private var loadingDialog : LoadingDialog? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -52,13 +52,14 @@ class EditorFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedState: Bundle?): View? {
         val scrollView = inflater.inflate(R.layout.main, container, false)
 
-        editor = scrollView.findViewById(R.id.editor)
-        editor.apply {
+        editor = scrollView.findViewById<EditText>(R.id.editor).apply {
             textSize =  mActivity.pref.getInt(MainActivity.PREF_TEXT_SIZE, MainActivity.SIZE_MEDIUM).toFloat()
             addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(p1: CharSequence, p2: Int, p3: Int, p4: Int) {}
                 override fun onTextChanged(p1: CharSequence, p2: Int, p3: Int, p4: Int) {}
                 override fun afterTextChanged(p1: Editable) {
+                    loadingDialog?.dismiss()
+                    loadingDialog = null
                     if (!ignoreNextTextChange) setTextChanged(true)
                     else ignoreNextTextChange = false
                 }
@@ -72,6 +73,8 @@ class EditorFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         if (initialized) return
         arguments?.getParcelable<Uri>(ARGUMENT_URI)?.also {
+            uri = it
+            tabTitle = getFileName(mActivity, it) ?: getString(R.string.new_document)
             ReadTask(mActivity.contentResolver, it, currentEncoding) { text ->
                 if (text == null) close()
                 else {
@@ -81,6 +84,7 @@ class EditorFragment : Fragment() {
             }.execute()
         }
         initialized = true
+        if (uri == null) tabTitle = getString(R.string.new_document)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -133,9 +137,7 @@ class EditorFragment : Fragment() {
 
     private fun setTextChanged(changed: Boolean) {
         hasUnsavedChanges = changed
-        val selectedTab = mActivity.actionBar!!.selectedTab
-        val name: String = if (uri == null) getString(R.string.new_document) else getFileName(mActivity, uri!!) ?: getString(R.string.new_document)
-        selectedTab.text = if (changed) "$name*" else name
+        mActivity.actionBar!!.selectedTab.text = if (changed) "$tabTitle*" else tabTitle
     }
 
     private fun setEncoding(newEncoding: String) {
@@ -145,9 +147,12 @@ class EditorFragment : Fragment() {
         }
 
         val readFileAgain = {
+            loadingDialog = LoadingDialog()
+            loadingDialog?.show(childFragmentManager, "loadingDialog")
             ReadTask(mActivity.contentResolver, uri!!, newEncoding) {
                 if (it != null) {
-                    editor.setText(it)
+                    loadingDialog?.dismiss()
+                    setTextWithProgressDialog(it)
                     currentEncoding = newEncoding
                 } else Toast.makeText(activity, R.string.reading_error, Toast.LENGTH_SHORT).show()
             }.execute()
@@ -208,32 +213,40 @@ class EditorFragment : Fragment() {
     }
 
     private val writeFile: (Uri, String) -> Unit = { uri, encoding ->
+        loadingDialog = LoadingDialog()
+        loadingDialog?.show(childFragmentManager, "loadingDialog")
         WriteTask(mActivity.contentResolver, uri, editor.text.toString(), encoding) {
-            if (it) {
-                this.uri = uri
-                this.currentEncoding = encoding
-                setTextChanged(false)
-                val successMessage = resources.getString(R.string.file_save_success, getFileName(mActivity, uri))
-                Toast.makeText(context, successMessage, Toast.LENGTH_SHORT).show()
-                LastFilesMaster.add(uri)
-            } else {
-                Toast.makeText(context, R.string.file_save_error, Toast.LENGTH_SHORT).show()
-            }
+            onFileWritten(uri, encoding, it)
         }.execute()
     }
 
     private val writeFileAndCloseTab: (Uri, String) -> Unit = { uri, encoding ->
+        loadingDialog = LoadingDialog()
+        loadingDialog?.show(childFragmentManager, "loadingDialog")
         WriteTask(mActivity.contentResolver, uri, editor.text.toString(), encoding) {
-            if (it) {
-                val successMessage = resources.getString(R.string.file_save_success, getFileName(mActivity, uri))
-                Toast.makeText(activity, successMessage, Toast.LENGTH_SHORT).show()
-                LastFilesMaster.add(uri)
-                with (mActivity) {
-                    closeTab(actionBar!!.selectedTab)
-                }
-            } else {
-                Toast.makeText(activity, R.string.file_save_error, Toast.LENGTH_SHORT).show()
+            onFileWritten(uri, encoding, it)
+            if (it) with (mActivity) {
+                closeTab(actionBar!!.selectedTab)
             }
+        }
+    }
+
+    private val onFileWritten: (Uri, String, Boolean) -> Unit = { uri, encoding, successfully ->
+        loadingDialog?.dismiss()
+        loadingDialog = null
+        if (successfully) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                takePersistablePermissions(mActivity, uri)
+            }
+            this.uri = uri
+            this.tabTitle = getFileName(mActivity, uri)!!
+            this.currentEncoding = encoding
+            setTextChanged(false)
+            val successMessage = resources.getString(R.string.file_save_success, tabTitle)
+            Toast.makeText(context, successMessage, Toast.LENGTH_SHORT).show()
+            LastFilesMaster.add(uri)
+        } else {
+            Toast.makeText(context, R.string.file_save_error, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -246,10 +259,9 @@ class EditorFragment : Fragment() {
      * @param text Text to set
      */
     private fun setTextWithProgressDialog(text: CharSequence?) {
-        val dialog = LoadingDialog()
-        dialog.show(childFragmentManager, "loadingDialog")
+        loadingDialog = LoadingDialog()
+        loadingDialog?.show(childFragmentManager, "loadingDialog")
         editor.setText(text)
-        dialog.dismiss()
     }
 
     companion object {
