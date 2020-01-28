@@ -19,7 +19,6 @@ import ua.leonidius.rtlnotepad.dialogs.WrongFileTypeDialog
 import ua.leonidius.rtlnotepad.utils.LastFilesMaster
 import ua.leonidius.rtlnotepad.utils.getFileName
 import ua.leonidius.rtlnotepad.utils.takePersistablePermissions
-import java.io.File // TODO: remove
 import java.util.*
 
 class MainActivity : FragmentActivity() {
@@ -190,16 +189,16 @@ class MainActivity : FragmentActivity() {
     private fun openFile() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
             lateinit var dialog: LegacyOpenDialog
-            dialog = LegacyOpenDialog.create { file: File ->
-                if (!isText(file)) {
+            dialog = LegacyOpenDialog.create { uri ->
+                if (!isText(uri)) {
                     WrongFileTypeDialog.create {
-                        if (it) instance.addTab(Uri.fromFile(file))
+                        if (it) instance.addTab(uri)
                         else dialog.show(instance.supportFragmentManager, "openDialog")
                     }.show(instance.supportFragmentManager, "WFTDialog")
                 } else {
                     // we use 'instance' because otherwise it adds a new
                     // fragment to the old activity after orientation change
-                    instance.addTab(Uri.fromFile(file))
+                    instance.addTab(uri)
                 }
             }
             dialog.show(supportFragmentManager, "openDialog")
@@ -355,9 +354,9 @@ class MainActivity : FragmentActivity() {
 
        lateinit var instance: MainActivity
 
-        private fun isText(file: File) : Boolean {
+        private fun isText(uri: Uri) : Boolean {
             return try {
-                MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString()))!!.split("/")[0] == "text";
+                MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(uri.toString()))!!.split("/")[0] == "text";
             } catch (e: Exception) {
                 false
             }

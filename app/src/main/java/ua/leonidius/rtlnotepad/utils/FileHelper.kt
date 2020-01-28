@@ -10,11 +10,16 @@ import androidx.annotation.RequiresApi
 
 fun getFileName(context: Context, uri: Uri) : String? {
     val contentResolver = context.contentResolver
-    val cursor: Cursor? = contentResolver.query(
-            uri, null, null, null, null, null)
-    cursor?.use {
-        if (!it.moveToFirst()) return@use
-        return it.getString(it.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+    try {
+        val cursor: Cursor? = contentResolver.query(
+                uri, null, null, null, null, null)
+        cursor?.use {
+            if (!it.moveToFirst()) return@use
+            return it.getString(it.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+        }
+    } catch (e: SecurityException) {
+        e.printStackTrace()
+        return null
     }
     return null
 }

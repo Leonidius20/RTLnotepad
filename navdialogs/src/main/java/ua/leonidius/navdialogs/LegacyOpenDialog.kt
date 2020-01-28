@@ -1,6 +1,7 @@
 package ua.leonidius.navdialogs
 
 import android.app.Dialog
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.view.LayoutInflater
@@ -17,7 +18,8 @@ class LegacyOpenDialog : NavigationDialog() {
 
     companion object {
 
-        fun create(defaultDir: File = Environment.getExternalStorageDirectory(), callback: (File) -> Unit): LegacyOpenDialog {
+        fun create(defaultDir: File = Environment.getExternalStorageDirectory(),
+                   callback: (Uri) -> Unit): LegacyOpenDialog {
             val dialog = LegacyOpenDialog()
             dialog.initializerFunction = {
                 with (dialog.getViewModel()) {
@@ -48,7 +50,7 @@ class LegacyOpenDialog : NavigationDialog() {
     }
 
     override fun onFileClick(file: File) {
-        getViewModel().callback(file)
+        getViewModel().callback(Uri.fromFile(file))
         dialog!!.dismiss()
     }
 
@@ -60,7 +62,7 @@ class LegacyOpenDialog : NavigationDialog() {
     }
 
     class Model : NavigationDialog.NavDialogViewModel() {
-        internal lateinit var callback: ((File) -> Unit)
+        internal lateinit var callback: ((Uri) -> Unit)
     }
 
 }
