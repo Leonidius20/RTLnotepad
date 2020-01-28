@@ -14,15 +14,13 @@ import ua.leonidius.rtlnotepad.utils.LastFilesAdapter
 
 class LastFilesDialog : BaseDialog(), AdapterView.OnItemClickListener {
 
-    private lateinit var viewModel : Model
+    private lateinit var viewModel: Model
 
     companion object {
-        fun create(callback: (Uri) -> Unit) : LastFilesDialog {
-            val dialog = LastFilesDialog()
-            dialog.initializerFunction = {
-                dialog.getViewModel().callback = callback
+        fun create(callback: (Uri) -> Unit): LastFilesDialog {
+            return LastFilesDialog().apply {
+                initializerFunction = { getViewModel().callback = callback }
             }
-            return dialog
         }
     }
 

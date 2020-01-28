@@ -1,9 +1,7 @@
 package ua.leonidius.rtlnotepad
 
 import android.app.ActionBar
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -15,23 +13,21 @@ import androidx.fragment.app.FragmentActivity
 import ua.leonidius.navdialogs.LegacyOpenDialog
 import ua.leonidius.rtlnotepad.dialogs.ExitDialog
 import ua.leonidius.rtlnotepad.dialogs.LastFilesDialog
+import ua.leonidius.rtlnotepad.dialogs.LoadingDialog
 import ua.leonidius.rtlnotepad.dialogs.WrongFileTypeDialog
-import ua.leonidius.rtlnotepad.utils.LastFilesMaster
+import ua.leonidius.rtlnotepad.utils.addToLastFiles
 import ua.leonidius.rtlnotepad.utils.getFileName
 import ua.leonidius.rtlnotepad.utils.takePersistablePermissions
 import java.util.*
 
 class MainActivity : FragmentActivity() {
 
-    lateinit var pref: SharedPreferences
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         instance = this
-        pref = getPreferences(Context.MODE_PRIVATE)
 
         // Applying dark theme if chosen
-        if (pref.getString(PREF_THEME, PREF_THEME_LIGHT) == PREF_THEME_DARK) {
+        if (Settings.theme == Settings.PREF_THEME_DARK) {
             setTheme(R.style.Leonidius_Dark)
         }
 
@@ -40,8 +36,6 @@ class MainActivity : FragmentActivity() {
         // Setting up tab navigation
         actionBar!!.navigationMode = ActionBar.NAVIGATION_MODE_TABS
         actionBar!!.setDisplayShowTitleEnabled(false)
-
-        LastFilesMaster.initSlots(this)
 
         if (savedInstanceState == null) { // Cold start
             intent.data?.let { addTab(it) }
@@ -95,7 +89,7 @@ class MainActivity : FragmentActivity() {
             selectTab(tab)
         }
 
-        LastFilesMaster.add(uri)
+        addToLastFiles(uri)
     }
 
     /**
@@ -131,14 +125,17 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.options_main, menu)
-        when (pref.getString(PREF_THEME, PREF_THEME_LIGHT)) {
-            PREF_THEME_LIGHT -> menu.findItem(R.id.options_theme_light).isChecked = true
-            PREF_THEME_DARK -> menu.findItem(R.id.options_theme_dark).isChecked = true
+        when (Settings.theme) {
+            Settings.PREF_THEME_LIGHT -> menu.findItem(R.id.options_theme_light).isChecked = true
+            Settings.PREF_THEME_DARK -> menu.findItem(R.id.options_theme_dark).isChecked = true
         }
-        when (pref.getInt(PREF_TEXT_SIZE, SIZE_MEDIUM)) {
-            SIZE_SMALL -> menu.findItem(R.id.options_textSize_small).isChecked = true
-            SIZE_MEDIUM -> menu.findItem(R.id.options_textSize_medium).isChecked = true
-            SIZE_LARGE -> menu.findItem(R.id.options_textSize_large).isChecked = true
+        when (Settings.textSize) {
+            Settings.SIZE_SMALL -> menu.findItem(R.id.options_textSize_small).isChecked = true
+            Settings.SIZE_MEDIUM -> menu.findItem(R.id.options_textSize_medium).isChecked = true
+            Settings.SIZE_LARGE -> menu.findItem(R.id.options_textSize_large).isChecked = true
+        }
+        if (Settings.useLegacyDialogs) {
+            menu.findItem(R.id.options_useLegacyDialogs).isChecked = true
         }
         return super.onCreateOptionsMenu(menu)
     }
@@ -154,11 +151,11 @@ class MainActivity : FragmentActivity() {
                 return true
             }
             R.id.options_theme_light -> {
-                setThemeNow(PREF_THEME_LIGHT, item)
+                setThemeNow(Settings.PREF_THEME_LIGHT, item)
                 return true
             }
             R.id.options_theme_dark -> {
-                setThemeNow(PREF_THEME_DARK, item)
+                setThemeNow(Settings.PREF_THEME_DARK, item)
                 return true
             }
             R.id.options_last_files -> {
@@ -168,18 +165,27 @@ class MainActivity : FragmentActivity() {
                 return true
             }
             R.id.options_textSize_small -> {
-                setTextSize(SIZE_SMALL)
+                setTextSize(Settings.SIZE_SMALL)
                 item.isChecked = true
                 return true
             }
             R.id.options_textSize_medium -> {
-                setTextSize(SIZE_MEDIUM)
+                setTextSize(Settings.SIZE_MEDIUM)
                 item.isChecked = true
                 return true
             }
             R.id.options_textSize_large -> {
-                setTextSize(SIZE_LARGE)
+                setTextSize(Settings.SIZE_LARGE)
                 item.isChecked = true
+                return true
+            }
+            R.id.options_loadingDialog -> {
+                LoadingDialog().show(supportFragmentManager, "loadingDialog")
+                return true
+            }
+            R.id.options_useLegacyDialogs -> {
+                item.isChecked = !item.isChecked
+                Settings.useLegacyDialogs = item.isChecked
                 return true
             }
         }
@@ -187,7 +193,7 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun openFile() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT || Settings.useLegacyDialogs) {
             lateinit var dialog: LegacyOpenDialog
             dialog = LegacyOpenDialog.create { uri ->
                 if (!isText(uri)) {
@@ -295,10 +301,7 @@ class MainActivity : FragmentActivity() {
     private fun setThemeNow(theme: String, item: MenuItem) {
         if (!item.isChecked) {
             item.isChecked = true
-            with (pref.edit()) {
-                putString(PREF_THEME, theme)
-                apply()
-            }
+            Settings.theme = theme
             recreate()
         }
     }
@@ -309,8 +312,6 @@ class MainActivity : FragmentActivity() {
         if (actionBar!!.tabCount > 0) {
             outState.putInt(BUNDLE_SELECTED_TAB_INDEX, actionBar!!.selectedTab.position)
         }
-
-        LastFilesMaster.saveSlots(this)
     }
 
     /**
@@ -322,10 +323,7 @@ class MainActivity : FragmentActivity() {
         for (i in 0 until actionBar!!.tabCount) {
             (actionBar!!.getTabAt(i).tag as EditorFragment).setEditorTextSize(size.toFloat())
         }
-        with (pref.edit()) {
-            putInt(PREF_TEXT_SIZE, size)
-            apply()
-        }
+        Settings.textSize = size
     }
 
     override fun onRetainCustomNonConfigurationInstance(): Any? {
@@ -342,19 +340,11 @@ class MainActivity : FragmentActivity() {
         // Request codes
         const val PICK_TEXT_FILE = 0
 
-        internal const val SIZE_SMALL = 14
-        internal const val SIZE_MEDIUM = 18
-        internal const val SIZE_LARGE = 22
-        internal const val PREF_TEXT_SIZE = "textSize"
-        private const val PREF_THEME = "theme"
-        private const val PREF_THEME_LIGHT = "light"
-        private const val PREF_THEME_DARK = "dark"
-
         private const val BUNDLE_SELECTED_TAB_INDEX = "selectedTabIndex"
 
        lateinit var instance: MainActivity
 
-        private fun isText(uri: Uri) : Boolean {
+        private fun isText(uri: Uri): Boolean {
             return try {
                 MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(uri.toString()))!!.split("/")[0] == "text";
             } catch (e: Exception) {

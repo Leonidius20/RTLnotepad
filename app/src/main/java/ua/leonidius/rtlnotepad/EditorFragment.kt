@@ -16,7 +16,6 @@ import ua.leonidius.navdialogs.LegacySaveDialog
 import ua.leonidius.rtlnotepad.dialogs.CloseTabDialog
 import ua.leonidius.rtlnotepad.dialogs.ConfirmEncodingChangeDialog
 import ua.leonidius.rtlnotepad.dialogs.EncodingDialog
-import ua.leonidius.rtlnotepad.dialogs.LoadingDialog
 import ua.leonidius.rtlnotepad.utils.*
 
 class EditorFragment : Fragment() {
@@ -33,8 +32,6 @@ class EditorFragment : Fragment() {
 
     private var initialized = false
     private var ignoreNextTextChange = false
-
-    private var loadingDialog : LoadingDialog? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -53,17 +50,8 @@ class EditorFragment : Fragment() {
         val scrollView = inflater.inflate(R.layout.main, container, false)
 
         editor = scrollView.findViewById<EditText>(R.id.editor).apply {
-            textSize =  mActivity.pref.getInt(MainActivity.PREF_TEXT_SIZE, MainActivity.SIZE_MEDIUM).toFloat()
-            addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(p1: CharSequence, p2: Int, p3: Int, p4: Int) {}
-                override fun onTextChanged(p1: CharSequence, p2: Int, p3: Int, p4: Int) {}
-                override fun afterTextChanged(p1: Editable) {
-                    loadingDialog?.dismiss()
-                    loadingDialog = null
-                    if (!ignoreNextTextChange) setTextChanged(true)
-                    else ignoreNextTextChange = false
-                }
-            })
+            textSize = Settings.textSize.toFloat()
+            addTextChangedListener(getTextWatcher())
         }
 
         return scrollView
@@ -122,7 +110,7 @@ class EditorFragment : Fragment() {
      * Shows a SaveDialog and writes the text to the selected file.
      */
     private fun openSaveDialog() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT || Settings.useLegacyDialogs) {
             LegacySaveDialog.create(defaultEncoding = currentEncoding, callback = writeFile)
                     .show(childFragmentManager, "saveDialogLegacy")
         } else {
@@ -147,11 +135,8 @@ class EditorFragment : Fragment() {
         }
 
         val readFileAgain = {
-            loadingDialog = LoadingDialog()
-            loadingDialog?.show(childFragmentManager, "loadingDialog")
             ReadTask(mActivity.contentResolver, uri!!, newEncoding) {
                 if (it != null) {
-                    loadingDialog?.dismiss()
                     setTextWithProgressDialog(it)
                     currentEncoding = newEncoding
                 } else Toast.makeText(activity, R.string.reading_error, Toast.LENGTH_SHORT).show()
@@ -189,7 +174,7 @@ class EditorFragment : Fragment() {
                 return@create
             }
 
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT || Settings.useLegacyDialogs) {
                 LegacySaveDialog.create(defaultEncoding = currentEncoding, callback = writeFileAndCloseTab)
                         .show(childFragmentManager, "saveDialogLegacy")
             } else {
@@ -213,16 +198,12 @@ class EditorFragment : Fragment() {
     }
 
     private val writeFile: (Uri, String) -> Unit = { uri, encoding ->
-        loadingDialog = LoadingDialog()
-        loadingDialog?.show(childFragmentManager, "loadingDialog")
         WriteTask(mActivity.contentResolver, uri, editor.text.toString(), encoding) {
             onFileWritten(uri, encoding, it)
         }.execute()
     }
 
     private val writeFileAndCloseTab: (Uri, String) -> Unit = { uri, encoding ->
-        loadingDialog = LoadingDialog()
-        loadingDialog?.show(childFragmentManager, "loadingDialog")
         WriteTask(mActivity.contentResolver, uri, editor.text.toString(), encoding) {
             onFileWritten(uri, encoding, it)
             if (it) with (mActivity) {
@@ -232,8 +213,6 @@ class EditorFragment : Fragment() {
     }
 
     private val onFileWritten: (Uri, String, Boolean) -> Unit = { uri, encoding, successfully ->
-        loadingDialog?.dismiss()
-        loadingDialog = null
         if (successfully) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 takePersistablePermissions(mActivity, uri)
@@ -244,7 +223,7 @@ class EditorFragment : Fragment() {
             setTextChanged(false)
             val successMessage = resources.getString(R.string.file_save_success, tabTitle)
             Toast.makeText(context, successMessage, Toast.LENGTH_SHORT).show()
-            LastFilesMaster.add(uri)
+            addToLastFiles(uri)
         } else {
             Toast.makeText(context, R.string.file_save_error, Toast.LENGTH_SHORT).show()
         }
@@ -258,10 +237,28 @@ class EditorFragment : Fragment() {
      * Sets a specified text to editor and shows a progress dialog while it is being set.
      * @param text Text to set
      */
-    private fun setTextWithProgressDialog(text: CharSequence?) {
-        loadingDialog = LoadingDialog()
-        loadingDialog?.show(childFragmentManager, "loadingDialog")
-        editor.setText(text)
+    private fun setTextWithProgressDialog(text: CharSequence) {
+        /*Log.d("EditorFragment", "Inside setTextWithProgressDialog")
+        SetTextTask(mActivity, childFragmentManager, editor, text) {
+            Log.d("EditorFragment", "inside callback")
+            editor = it.apply {
+                textSize =  Settings.textSize.toFloat()
+                addTextChangedListener(getTextWatcher())
+            }
+        }.execute()
+        Log.d("EditorFragment", "New Thread must've been started")*/
+        editor.setText(text) // TODO
+    }
+
+    private fun getTextWatcher(): TextWatcher {
+        return object: TextWatcher {
+            override fun beforeTextChanged(p1: CharSequence, p2: Int, p3: Int, p4: Int) {}
+            override fun onTextChanged(p1: CharSequence, p2: Int, p3: Int, p4: Int) {}
+            override fun afterTextChanged(p1: Editable) {
+                if (!ignoreNextTextChange) setTextChanged(true)
+                else ignoreNextTextChange = false
+            }
+        }
     }
 
     companion object {

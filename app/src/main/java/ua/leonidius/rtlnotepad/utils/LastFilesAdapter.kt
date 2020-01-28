@@ -9,10 +9,11 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import ua.leonidius.rtlnotepad.R
+import ua.leonidius.rtlnotepad.Settings
 
 class LastFilesAdapter(private val context: Context): BaseAdapter() {
 
-    private val uriList = LastFilesMaster.getLastFiles().toList()
+    private val uriList = Settings.lastFiles.toList()
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val view : View = convertView ?:

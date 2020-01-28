@@ -25,9 +25,13 @@ android {
     }
     buildTypes {
         release {
+            resValue "bool", "DEBUG", "false"
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            resValue "bool", "DEBUG", "true"
         }
     }
 }
@@ -37,6 +41,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
     implementation project(":navdialogs")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.chibatching.kotpref:kotpref:2.10.0'
 }
 repositories {
     mavenCentral()
