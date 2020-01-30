@@ -45,5 +45,6 @@
 	<string name="file_save_success">Successfully saved %1$s.</string>
 	<string name="grant_read_permissions">In order to continue the operation, you need to grant read permissions to the app. Continue?</string>
 	<string name="grant_write_permissions">In order to continue the operation, you need to grant write permissions to the app. Continue?</string>
+	<string name="file_read_only">This file is read-only.</string>
 
 </resources>

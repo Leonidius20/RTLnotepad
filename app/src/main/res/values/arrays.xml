@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="mimeTypes">
+        <item>text/*</item>
+        <item>application/javascript</item>
+        <item>application/ecmascript</item>
+    </string-array>
+    <string name="mimeTypesString" translatable="false">text/*,application/javascript,application/ecmascript,application/json</string>
+</resources>

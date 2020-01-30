@@ -102,7 +102,7 @@ class LegacySaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
         rewriteDialog = RewriteDialog.create { rewrite ->
             if (rewrite)
                 getViewModel().callback(Uri.fromFile(file), encoding)
-            else
+            else {
                 // crash when activity was recreated after orientation change
                 // technically we can use MainActivity.instance here...
                 if (rewriteDialog.activity != null) {
@@ -110,6 +110,7 @@ class LegacySaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
                 } else {
                     Log.d("SaveDialog", "There is no reference to the new activity, so the SaveDialog couldn't be shown")
                 }
+            }
             rewriteDialog.dialog?.cancel()
         }
         rewriteDialog.show(parentFragmentManager, "rewriteDialog")

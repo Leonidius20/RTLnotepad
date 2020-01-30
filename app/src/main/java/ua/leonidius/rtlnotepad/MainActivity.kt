@@ -210,10 +210,11 @@ class MainActivity : FragmentActivity() {
             dialog.show(supportFragmentManager, "openDialog")
             return
         }
-
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
-            type = "text/*"
+            type = "*/*"
+            val mimeTypes = resources.getStringArray(R.array.mimeTypes)
+            putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
         }
         startActivityForResult(intent, PICK_TEXT_FILE)
     }

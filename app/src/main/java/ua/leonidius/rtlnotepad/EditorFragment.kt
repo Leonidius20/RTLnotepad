@@ -80,13 +80,28 @@ class EditorFragment : Fragment() {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        uri?.let {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && !canWriteFile(mActivity, it)) {
+                menu.findItem(R.id.options_save).isEnabled = false
+                menu.findItem(R.id.options_save_as).isEnabled = false
+            }
+        }
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.options_save -> {
-                if (uri == null)
-                    openSaveDialog()
-                else
-                    writeFile(uri!!, currentEncoding) // Saving changes
+                if (uri == null) openSaveDialog()
+                else {
+                    // Saving changes
+                    if (!canWriteFile(mActivity, uri!!)) {
+                        Toast.makeText(mActivity, R.string.file_read_only, Toast.LENGTH_SHORT).show()
+                        return true
+                    }
+                    writeFile(uri!!, currentEncoding)
+                }
                 return true
             }
             R.id.options_save_as -> {
@@ -117,6 +132,7 @@ class EditorFragment : Fragment() {
             val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 type = "text/*"
+                // TODO: add a dialog to choose file's mime type
                 putExtra(Intent.EXTRA_TITLE, ".txt")
             }
             startActivityForResult(intent, SAVE_FILE)
@@ -191,9 +207,15 @@ class EditorFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
         if (resultCode != Activity.RESULT_OK) return
-        when (requestCode) {
-            SAVE_FILE -> resultData?.data?.let { writeFile(it, currentEncoding) }
-            SAVE_FILE_AND_CLOSE -> resultData?.data?.let { writeFileAndCloseTab(it, currentEncoding) }
+        resultData?.data?.let {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                takePersistablePermissions(mActivity, it)
+            }
+            when (requestCode) {
+                SAVE_FILE -> writeFile(it, currentEncoding)
+                SAVE_FILE_AND_CLOSE -> writeFileAndCloseTab(it, currentEncoding)
+                else -> return@let
+            }
         }
     }
 
@@ -214,9 +236,6 @@ class EditorFragment : Fragment() {
 
     private val onFileWritten: (Uri, String, Boolean) -> Unit = { uri, encoding, successfully ->
         if (successfully) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                takePersistablePermissions(mActivity, uri)
-            }
             this.uri = uri
             this.tabTitle = getFileName(mActivity, uri)!!
             this.currentEncoding = encoding

@@ -42,4 +42,5 @@
     <string name="file_save_success">Файл %1$s успішно збережено.</string>
     <string name="grant_read_permissions">Щоб продовжити операцію, необхідно надати дозвіл на читання з пам\'яті пристрою. Продовжити?</string>
 	<string name="grant_write_permissions">Щоб продовжити операцію, необхідно надати дозвіл на запис до пам\'яті пристрою. Продовжити?</string>
+    <string name="file_read_only">Цей файл є доступним лише для читання.</string>
 </resources>
