@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
+import android.webkit.MimeTypeMap
 
 fun getFileName(context: Context, uri: Uri) : String? {
     val contentResolver = context.contentResolver
@@ -76,5 +77,14 @@ fun fileExists(context: Context, uri: Uri): Boolean {
     } catch (e: Exception) {
         e.printStackTrace()
         return false
+    }
+}
+
+// For LegacyOpenDialog's WrongFileTypeDialog
+fun isText(uri: Uri): Boolean {
+    return try {
+        MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(uri.toString()))!!.split("/")[0] == "text";
+    } catch (e: Exception) {
+        false
     }
 }

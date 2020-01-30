@@ -171,22 +171,21 @@ class EditorFragment : Fragment() {
      * Provides an opportunity to save changes if they are not saved.
      */
     private fun close() {
-        val selectedTab = mActivity.actionBar!!.selectedTab
 
         if (!hasUnsavedChanges) {
-            mActivity.closeTab(selectedTab)
+            mActivity.closeSelectedTab()
             return
         }
 
         CloseTabDialog.create { save ->
             if (!save) {
-                mActivity.closeTab(selectedTab)
+                mActivity.closeSelectedTab()
                 return@create
             }
 
             if (uri != null) {
                 writeFile(uri!!, currentEncoding) // Saving changes
-                mActivity.closeTab(selectedTab)
+                mActivity.closeSelectedTab()
                 return@create
             }
 
@@ -229,7 +228,7 @@ class EditorFragment : Fragment() {
         WriteTask(mActivity.contentResolver, uri, editor.text.toString(), encoding) {
             onFileWritten(uri, encoding, it)
             if (it) with (mActivity) {
-                closeTab(actionBar!!.selectedTab)
+                closeSelectedTab()
             }
         }
     }

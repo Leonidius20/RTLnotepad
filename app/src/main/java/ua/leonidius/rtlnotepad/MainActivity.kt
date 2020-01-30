@@ -1,15 +1,13 @@
 package ua.leonidius.rtlnotepad
 
-import android.app.ActionBar
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.webkit.MimeTypeMap
-import android.widget.LinearLayout
-import androidx.fragment.app.FragmentActivity
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.tabs.TabLayout
 import ua.leonidius.navdialogs.LegacyOpenDialog
 import ua.leonidius.rtlnotepad.dialogs.ExitDialog
 import ua.leonidius.rtlnotepad.dialogs.LastFilesDialog
@@ -17,10 +15,12 @@ import ua.leonidius.rtlnotepad.dialogs.LoadingDialog
 import ua.leonidius.rtlnotepad.dialogs.WrongFileTypeDialog
 import ua.leonidius.rtlnotepad.utils.addToLastFiles
 import ua.leonidius.rtlnotepad.utils.getFileName
+import ua.leonidius.rtlnotepad.utils.isText
 import ua.leonidius.rtlnotepad.utils.takePersistablePermissions
-import java.util.*
 
-class MainActivity : FragmentActivity() {
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var tabLayout: TabLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,20 +31,25 @@ class MainActivity : FragmentActivity() {
             setTheme(R.style.Leonidius_Dark)
         }
 
-        setContentView(LinearLayout(this))
+        setContentView(R.layout.main_activity)
+        tabLayout = findViewById(R.id.tabs)
 
-        // Setting up tab navigation
-        actionBar!!.navigationMode = ActionBar.NAVIGATION_MODE_TABS
-        actionBar!!.setDisplayShowTitleEnabled(false)
+        supportActionBar!!.setDisplayShowTitleEnabled(false)
+
+        tabLayout.addOnTabSelectedListener(EditorTabListener())
 
         if (savedInstanceState == null) { // Cold start
             intent.data?.let { addTab(it) }
             addPlaceholderFragmentIfNeeded()
-            return
+        } else { // restoring tab selection
+            /*val selectedTabIndex = savedInstanceState.getInt(BUNDLE_SELECTED_TAB_INDEX, -1)
+            actionBar?.let {
+                it.selectTab(it.getTabAt(selectedTabIndex))
+            }*/
         }
 
         // Restoring tabs after activity recreation
-        val tabs = lastCustomNonConfigurationInstance as LinkedHashMap<String, ActionBar.Tab>
+        /*val tabs = lastCustomNonConfigurationInstance as LinkedHashMap<String, ActionBar.Tab>
         if (tabs.size != 0) {
             val selectedTabIndex = savedInstanceState.getInt(BUNDLE_SELECTED_TAB_INDEX, -1)
             for (tab in tabs.values) {
@@ -53,7 +58,7 @@ class MainActivity : FragmentActivity() {
                     if (tab.position == selectedTabIndex) selectTab(tab)
                 }
             }
-        }
+        }*/
     }
 
     /**
@@ -62,7 +67,7 @@ class MainActivity : FragmentActivity() {
     private fun addTab(uri: Uri) {
         // Checking if the file is already opened
         getFileTab(uri)?.also {
-            actionBar!!.selectTab(it)
+            it.select()
             return
         }
 
@@ -78,16 +83,19 @@ class MainActivity : FragmentActivity() {
         }
 
         // Creating a new tab
-        val tab = actionBar!!.newTab().apply {
+        val tab = tabLayout.newTab().apply {
             text = displayName
-            tag = fragment
-            setTabListener(EditorTabListener())
+            tag = fragment.mTag
         }
 
-        with (actionBar!!) {
-            addTab(tab)
-            selectTab(tab)
+        with (supportFragmentManager.beginTransaction()) {
+            add(fragment, fragment.mTag)
+            commitAllowingStateLoss()
         }
+        supportFragmentManager.executePendingTransactions()
+
+        tabLayout.addTab(tab)
+        tab.select()
 
         addToLastFiles(uri)
     }
@@ -100,16 +108,19 @@ class MainActivity : FragmentActivity() {
 
         val fragment = EditorFragment().apply { retainInstance = true }
 
-        val tab = actionBar!!.newTab().apply {
+        val tab = tabLayout.newTab().apply {
             setText(R.string.new_document)
-            tag = fragment
-            setTabListener(EditorTabListener())
+            tag = fragment.mTag
         }
 
-        with (actionBar!!) {
-            addTab(tab)
-            selectTab(tab)
+        with (supportFragmentManager.beginTransaction()) {
+            add(fragment, fragment.mTag)
+            commitAllowingStateLoss()
         }
+        supportFragmentManager.executePendingTransactions()
+
+        tabLayout.addTab(tab)
+        tab.select()
     }
 
     /**
@@ -118,9 +129,15 @@ class MainActivity : FragmentActivity() {
      *
      * @param tab Tab to close
      */
-    fun closeTab(tab: ActionBar.Tab) {
-        actionBar!!.removeTab(tab)
+    private fun closeTab(tab: TabLayout.Tab) {
+        tabLayout.removeTab(tab)
         addPlaceholderFragmentIfNeeded()
+    }
+
+    fun closeSelectedTab() {
+        tabLayout.let {
+            closeTab(it.getTabAt(it.selectedTabPosition)!!)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -235,9 +252,9 @@ class MainActivity : FragmentActivity() {
     }
 
     override fun onBackPressed() {
-        for (i in 0 until actionBar!!.tabCount) {
-            val tab = actionBar!!.getTabAt(i)
-            val tabFragment = tab.tag as EditorFragment
+        for (i in 0 until tabLayout.tabCount) {
+            val tab = tabLayout.getTabAt(i)!!
+            val tabFragment = supportFragmentManager.findFragmentByTag(tab.tag as String) as EditorFragment
             if (tabFragment.hasUnsavedChanges) {
                 ExitDialog.create { exit ->
                     if (exit) finish()
@@ -254,9 +271,9 @@ class MainActivity : FragmentActivity() {
      * @param uriToFind File which is opened in the tab we are looking for
      * @return ActionBar.Tab in which the specified file is opened, if such a tab exists, null otherwise
      */
-    private fun getFileTab(uriToFind: Uri) : ActionBar.Tab? {
-        for (i in 0 until actionBar!!.tabCount) {
-            val tab = actionBar!!.getTabAt(i)
+    private fun getFileTab(uriToFind: Uri) : TabLayout.Tab? {
+        for (i in 0 until tabLayout.tabCount) {
+            val tab = tabLayout.getTabAt(i)!!
             if ((tab.tag as EditorFragment).run { uri != null && uri!! == uriToFind }) return tab
         }
         return null
@@ -266,7 +283,7 @@ class MainActivity : FragmentActivity() {
      * Attaches a PlaceholderFragment if all the tabs are closed.
      */
     private fun addPlaceholderFragmentIfNeeded() {
-        if (actionBar!!.tabCount == 0) {
+        if (tabLayout.tabCount == 0) {
             val placeholder = supportFragmentManager.findFragmentByTag(PlaceholderFragment.TAG) ?: PlaceholderFragment()
             with (supportFragmentManager.beginTransaction()) {
                 if (!placeholder.isAdded) add(android.R.id.content, placeholder, PlaceholderFragment.TAG)
@@ -280,7 +297,7 @@ class MainActivity : FragmentActivity() {
      * Removes a PlaceholderFragment if a tab is being opened.
      */
     private fun removePlaceholderFragmentIfNeeded() {
-        if (actionBar!!.tabCount == 0) {
+        if (tabLayout.tabCount == 0) {
             supportFragmentManager.findFragmentByTag(PlaceholderFragment.TAG).let {
                 if (it != null && !it.isDetached) {
                     with (supportFragmentManager.beginTransaction()) {
@@ -310,8 +327,8 @@ class MainActivity : FragmentActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        if (actionBar!!.tabCount > 0) {
-            outState.putInt(BUNDLE_SELECTED_TAB_INDEX, actionBar!!.selectedTab.position)
+        if (tabLayout.tabCount > 0) {
+            outState.putInt(BUNDLE_SELECTED_TAB_INDEX, tabLayout.selectedTabPosition)
         }
     }
 
@@ -321,20 +338,22 @@ class MainActivity : FragmentActivity() {
      * @param size The text size to apply
      */
     private fun setTextSize(size: Int) {
-        for (i in 0 until actionBar!!.tabCount) {
-            (actionBar!!.getTabAt(i).tag as EditorFragment).setEditorTextSize(size.toFloat())
+        for (i in 0 until tabLayout.tabCount) {
+            val tab = tabLayout.getTabAt(i)!!
+            val fragment = supportFragmentManager.findFragmentByTag(tab.tag as String) as EditorFragment
+            fragment.setEditorTextSize(size.toFloat())
         }
         Settings.textSize = size
     }
 
-    override fun onRetainCustomNonConfigurationInstance(): Any? {
+    /*override fun onRetainCustomNonConfigurationInstance(): Any? {
         val tabs = LinkedHashMap<String, ActionBar.Tab>()
         for (i in 0 until actionBar!!.tabCount) {
             val tab = actionBar!!.getTabAt(i)
             tabs[(tab.tag as EditorFragment).tag!!] = tab
         }
         return tabs
-    }
+    }*/
 
     companion object {
 
@@ -343,15 +362,7 @@ class MainActivity : FragmentActivity() {
 
         private const val BUNDLE_SELECTED_TAB_INDEX = "selectedTabIndex"
 
-       lateinit var instance: MainActivity
-
-        private fun isText(uri: Uri): Boolean {
-            return try {
-                MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(uri.toString()))!!.split("/")[0] == "text";
-            } catch (e: Exception) {
-                false
-            }
-        }
+        lateinit var instance: MainActivity
 
     }
 

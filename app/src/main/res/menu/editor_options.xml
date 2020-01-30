@@ -1,23 +1,22 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-	
-	<item
-        android:id="@+id/options_save"
-        android:title="@string/save"
-		android:showAsAction="ifRoom"
-		android:icon="@drawable/save_gray"/>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:android="http://schemas.android.com/apk/res/android">
 
-	<item
-        android:id="@+id/options_save_as"
-        android:title="@string/save_as"/>
-	
-	<item
-        android:id="@+id/options_encoding"
-        android:title="@string/encoding"/>
+    <item
+            android:id="@+id/options_save"
+            android:title="@string/save"
+            android:icon="@drawable/save_gray" app:showAsAction="ifRoom"/>
 
-	<item
-        android:id="@+id/options_close"
-        android:title="@string/close_tab"
-		android:showAsAction="always"
-		android:icon="@drawable/close"/>
-    
+    <item
+            android:id="@+id/options_save_as"
+            android:title="@string/save_as"/>
+
+    <item
+            android:id="@+id/options_encoding"
+            android:title="@string/encoding"/>
+
+    <item
+            android:id="@+id/options_close"
+            android:title="@string/close_tab"
+            android:icon="@drawable/close" app:showAsAction="always"/>
+
 </menu>
