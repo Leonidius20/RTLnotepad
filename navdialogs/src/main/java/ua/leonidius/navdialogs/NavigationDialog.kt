@@ -67,7 +67,7 @@ abstract class NavigationDialog : BaseDialog(), OnItemClickListener {
 
     fun openDir(directory: File?) {
         try {
-            filesList.adapter = AdapterFactory.getFileAdapter(activity as Activity, directory!!)
+            filesList.adapter = getFileAdapter(activity as Activity, directory!!)
             getViewModel().currentDir = directory
             pathView.text = getViewModel().currentDir!!.path
         } catch (e: Exception) {

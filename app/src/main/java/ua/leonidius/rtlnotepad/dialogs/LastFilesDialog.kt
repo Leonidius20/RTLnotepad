@@ -1,29 +1,26 @@
 package ua.leonidius.rtlnotepad.dialogs
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ListView
-import android.widget.TextView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import ua.leonidius.rtlnotepad.R
-import ua.leonidius.rtlnotepad.utils.LastFilesMaster
+import ua.leonidius.rtlnotepad.utils.LastFilesAdapter
 
 class LastFilesDialog : BaseDialog(), AdapterView.OnItemClickListener {
 
-    private lateinit var viewModel : Model
+    private lateinit var viewModel: Model
 
     companion object {
-        fun create(callback: (String) -> Unit) : LastFilesDialog {
-            val dialog = LastFilesDialog()
-            dialog.initializerFunction = {
-                dialog.getViewModel().callback = callback
+        fun create(callback: (Uri) -> Unit): LastFilesDialog {
+            return LastFilesDialog().apply {
+                initializerFunction = { getViewModel().callback = callback }
             }
-            return dialog
         }
     }
 
@@ -32,13 +29,13 @@ class LastFilesDialog : BaseDialog(), AdapterView.OnItemClickListener {
         adb.setTitle(R.string.last_files)
         val lastFilesList = ListView(activity)
         lastFilesList.onItemClickListener = this
-        lastFilesList.adapter = LastFilesMaster.getAdapter(activity as Activity)
+        lastFilesList.adapter = LastFilesAdapter(activity!!)
         adb.setView(lastFilesList)
         return adb.create()
     }
 
     override fun onItemClick(p1: AdapterView<*>, item: View, p3: Int, p4: Long) {
-        getViewModel().callback((item.findViewById<View>(R.id.lastFilesItem_path) as TextView).text.toString())
+        getViewModel().callback(item.tag as Uri)
         dialog?.cancel()
     }
 
@@ -50,7 +47,7 @@ class LastFilesDialog : BaseDialog(), AdapterView.OnItemClickListener {
     }
 
     class Model : ViewModel() {
-        internal lateinit var callback: ((String) -> Unit)
+        internal lateinit var callback: ((Uri) -> Unit)
     }
 
 }

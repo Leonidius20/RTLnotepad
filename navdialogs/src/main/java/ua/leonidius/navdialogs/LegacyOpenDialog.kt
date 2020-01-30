@@ -1,6 +1,7 @@
 package ua.leonidius.navdialogs
 
 import android.app.Dialog
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.view.LayoutInflater
@@ -11,14 +12,15 @@ import androidx.lifecycle.ViewModelProvider
 
 import java.io.File
 
-class OpenDialog : NavigationDialog() {
+class LegacyOpenDialog : NavigationDialog() {
 
     private lateinit var viewModel: Model
 
     companion object {
 
-        fun create(defaultDir: File = Environment.getExternalStorageDirectory(), callback: (File) -> Unit): OpenDialog {
-            val dialog = OpenDialog()
+        fun create(defaultDir: File = Environment.getExternalStorageDirectory(),
+                   callback: (Uri) -> Unit): LegacyOpenDialog {
+            val dialog = LegacyOpenDialog()
             dialog.initializerFunction = {
                 with (dialog.getViewModel()) {
                     this.currentDir = defaultDir
@@ -38,7 +40,7 @@ class OpenDialog : NavigationDialog() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // TODO: instead of a header put a horizontal layout with "up" and "create folder" options
-        return inflater.inflate(R.layout.navdialogs_dialog_open, container)
+        return inflater.inflate(R.layout.nav_dialogs_open, container)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -48,7 +50,7 @@ class OpenDialog : NavigationDialog() {
     }
 
     override fun onFileClick(file: File) {
-        getViewModel().callback(file)
+        getViewModel().callback(Uri.fromFile(file))
         dialog!!.dismiss()
     }
 
@@ -60,7 +62,7 @@ class OpenDialog : NavigationDialog() {
     }
 
     class Model : NavigationDialog.NavDialogViewModel() {
-        internal lateinit var callback: ((File) -> Unit)
+        internal lateinit var callback: ((Uri) -> Unit)
     }
 
 }

@@ -3,10 +3,6 @@
 	<item
 		android:id="@+id/options_new"
 		android:title="@string/new_file"/>
-
-	<item
-			android:id="@+id/options_test"
-			android:title="To test activity"/>
 	
     <item
         android:id="@+id/options_open"
@@ -45,5 +41,16 @@
 			</group>
 		</menu>
 	</item>
+
+	<item
+			android:id="@+id/options_loadingDialog"
+			android:title="Show LoadingDialog"
+			android:visible="@bool/DEBUG"/>
+
+	<item
+			android:id="@+id/options_useLegacyDialogs"
+			android:title="Use legacy dialogs"
+			android:checkable="true"
+			android:visible="@bool/DEBUG"/>
     
 </menu>

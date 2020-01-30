@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -17,7 +18,7 @@ import java.io.File
 import java.nio.charset.Charset
 import java.util.*
 
-class SaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
+class LegacySaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
 
     private lateinit var nameField: EditText
     private lateinit var encodingSpinner: Spinner
@@ -27,8 +28,8 @@ class SaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
 
         fun create(defaultName: String = ".txt", defaultEncoding: String = "UTF-8",
                    defaultDirectory: File = Environment.getExternalStorageDirectory(),
-                   callback: (File, String) -> Unit): SaveDialog {
-            val dialog = SaveDialog()
+                   callback: (Uri, String) -> Unit): LegacySaveDialog {
+            val dialog = LegacySaveDialog()
             dialog.initializerFunction = {
                 with(dialog.getViewModel()) {
                     this.fileName = defaultName
@@ -48,7 +49,7 @@ class SaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
         adb.setPositiveButton(android.R.string.ok, this)
 
         val inflater = LayoutInflater.from(context)
-        val dialogView = inflater.inflate(R.layout.navdialogs_dialog_save_as, null, false)
+        val dialogView = inflater.inflate(R.layout.nav_dialogs_save_as_legacy, null, false)
         initView(dialogView)
         adb.setView(dialogView)
 
@@ -93,15 +94,15 @@ class SaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
         val encoding = getViewModel().getAvailableEncodings()[encodingSpinner.selectedItemPosition]
 
         if (!file.exists()) {
-            getViewModel().callback(file, encoding)
+            getViewModel().callback(Uri.fromFile(file), encoding)
             return
         }
 
         lateinit var rewriteDialog : RewriteDialog
         rewriteDialog = RewriteDialog.create { rewrite ->
             if (rewrite)
-                getViewModel().callback(file, encoding)
-            else
+                getViewModel().callback(Uri.fromFile(file), encoding)
+            else {
                 // crash when activity was recreated after orientation change
                 // technically we can use MainActivity.instance here...
                 if (rewriteDialog.activity != null) {
@@ -109,6 +110,7 @@ class SaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
                 } else {
                     Log.d("SaveDialog", "There is no reference to the new activity, so the SaveDialog couldn't be shown")
                 }
+            }
             rewriteDialog.dialog?.cancel()
         }
         rewriteDialog.show(parentFragmentManager, "rewriteDialog")
@@ -122,7 +124,7 @@ class SaveDialog : NavigationDialog(), DialogInterface.OnClickListener {
     }
 
     class Model : NavigationDialog.NavDialogViewModel() {
-        internal lateinit var callback: ((File, String) -> Unit)
+        internal lateinit var callback: ((Uri, String) -> Unit)
         internal lateinit var fileName: String
         internal lateinit var currentEncoding: String
 

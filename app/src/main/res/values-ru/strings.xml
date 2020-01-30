@@ -42,4 +42,5 @@
     <string name="file_save_success">Файл %1$s успешно сохранён.</string>
     <string name="grant_read_permissions">Чтобы продолжить операцию, необходимо предоставить разрешение на чтение из памяти устройства. Продолжить?</string>
 	<string name="grant_write_permissions">Чтобы продолжить операцию, необходимо предоставить разрешение на запись в память устройства. Продолжить?</string>
+    <string name="file_read_only">Этот файл доступен только для чтения.</string>
 </resources>
